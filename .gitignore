@@ -1,0 +1,5 @@
+data/
+*.pyc
+*.o
+trajectory.txt
+output.txt

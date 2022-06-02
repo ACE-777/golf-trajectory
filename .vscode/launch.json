@@ -1,0 +1,124 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: train",
+            "type": "python",
+            "request": "launch",
+            "program": "trainval_net.py",
+            "args": [
+                "--dataset",
+                "pascal_voc",
+                "--net",
+                "res101",
+                "--bs",
+                "4",
+                "--nw",
+                "1",
+                "--lr",
+                "0.004",
+                "--lr_decay_step",
+                "8",
+                "--epochs",
+                "7",
+                "--cuda",
+            ],
+            "args2": [
+                "--start_epoch",
+                "3",
+                "--checkepoch",
+                "3",
+                "--checkpoint",
+                "1377",
+                "--r",
+                "True",
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: run",
+            "type": "python",
+            "request": "launch",
+            "program": "demo.py",
+            "args": [
+                "--net",
+                "res101",
+                "--checksession",
+                "1",
+                "--checkepoch",
+                "7",
+                "--checkpoint",
+                "2756",
+                "--cuda",
+                "--load_dir",
+                "models/",
+                "--video_path",
+                "videos/IMG_6078-20.83-converted.mov",
+                "--out_path",
+                "videos/output/IMG_6078-20.83-converted.avi"
+            ],
+            "args_": [
+                "--video_path",
+                "videos/67382978926__6E34F44B-A268-427A-B7A5-ACB8C821EB13-30.50.mov",
+                "--out_path",
+                "videos/output/67382978926__6E34F44B-A268-427A-B7A5-ACB8C821EB13-30.50.avi"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: tracking",
+            "type": "python",
+            "request": "launch",
+            "program": "tracking.py",
+            "args": [
+                "--checksession",
+                "1",
+                "--checkepoch",
+                "7",
+                "--checkpoint",
+                "2756",
+                "--cuda",
+                "--video_path",
+                "videos/IMG_6078-20.83-converted.mov",
+                "--out_path",
+                "videos/output/IMG_6078-20.83-converted.avi",
+                "--init_x",
+                "614",
+                "--init_y",
+                "1222",
+                "--start_frame",
+                "389",
+            ],
+            "args_": [
+                "--init_x",
+                "676, 682",
+                "--init_y",
+                "1012, 1484"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: reconstruct",
+            "type": "python",
+            "request": "launch",
+            "program": "reconstruct.py",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
