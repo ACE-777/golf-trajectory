@@ -52,6 +52,7 @@ class Reconstructor:
                 bbox[1] = bbox[1] + bbox[3] / 2
                 bbox.append(track)
                 bbox.append(int(vals[0]))
+                bbox.append(int(vals[6]))
                 self.tracks.append(bbox)
 
             count = len(self.tracks)
@@ -131,7 +132,7 @@ class Reconstructor:
         # atan2(px, depth) = fov/2
         # tan(fov/2) = px / depth
         # depth = px / tan(fov/2)
-        w_px = math.sqrt((bbox[2]*bbox[2]+bbox[3]*bbox[3])/2)
+        w_px = bbox[6] #math.sqrt((bbox[2]*bbox[2]+bbox[3]*bbox[3])/2)
         w_metric = self.diameter
 
         width_dist = width / w_px * w_metric
@@ -163,11 +164,14 @@ class Reconstructor:
     
     def fit(self):
         count = len(self.pts)
-        tdata = np.linspace(0, count - 1, count)
+        #tdata = np.linspace(0, count - 1, count)
+        first_frame = self.tracks[0][5]
+        tdata = np.array([bbox[5]-first_frame for bbox in self.tracks])
         xdata = np.array([pt[0] for pt in self.pts])
         ydata = np.array([pt[1] for pt in self.pts])
         zdata = np.array([pt[2] for pt in self.pts])
 
+        count = tdata[-1]
         tdata = np.append(tdata, count*3)
         xdata = np.append(xdata, 0)
         ydata = np.append(ydata, 0)

@@ -177,7 +177,8 @@ def _get_sub_image(im, pos, ratio):
 def _get_best_det(dets, last_pos, offset, ratio, last_ball_size, thresh):
     best_bbox = None
     best_score = 0
-    best_ratio = 2
+    best_ratio = 0.9
+    best_size = 0
 
     noise = 20 / ratio * 10
     size_factor = 1.8
@@ -186,12 +187,13 @@ def _get_best_det(dets, last_pos, offset, ratio, last_ball_size, thresh):
     if count > 1:
       a = 1
     for i in range(count):
-        bbox = tuple(int(np.round(x)) for x in dets[i, :4])
+        #bbox = tuple(int(np.round(x)) for x in dets[i, :4])
+        bbox = tuple(x for x in dets[i, :4])
         bbox = (
-          int(bbox[0] / ratio) + offset[0],
-          int(bbox[1] / ratio) + offset[1],
-          int(bbox[2] / ratio) + offset[0],
-          int(bbox[3] / ratio) + offset[1]
+          (bbox[0] / ratio) + offset[0],
+          (bbox[1] / ratio) + offset[1],
+          (bbox[2] / ratio) + offset[0],
+          (bbox[3] / ratio) + offset[1]
           )
         score = dets[i, -1]
 
@@ -216,10 +218,14 @@ def _get_best_det(dets, last_pos, offset, ratio, last_ball_size, thresh):
           #if ball_size > last_ball_size * size_factor or ball_size < last_ball_size / size_factor:
           #  continue
 
-        if best_ratio > size_ratio:
+        if size_ratio > 1.5:
+          continue
+
+        if best_size < ball_size:
             best_score = score
-            best_bbox = bbox
-            best_ratio = size_ratio
+            best_bbox = tuple(int(x) for x in bbox)
+            #best_ratio = size_ratio
+            best_size = ball_size
 
     return best_bbox, best_score
 
@@ -228,8 +234,8 @@ def calc_ratio(ball_size, expected_ball_size):
   ratio = int(math.pow(2, math.ceil(math.log2(ratio))))
   if ratio < 1:
     ratio = 1
-  if ratio > 16:
-    ratio = 16
+  if ratio > 4:
+    ratio = 4
   return ratio
 
 def calc_ball_size(det):
@@ -242,9 +248,20 @@ def predict(tracks):
     return None
   if len(tracks) == 1:
     return tracks[0]
-  pt2 = tracks[-1]
-  pt1 = tracks[-2]
-  return (pt2[0]*2-pt1[0], pt2[1]*2-pt1[1])
+  
+  length = 5
+  if len(tracks) > length:
+    next_pos = (0, 0)
+    for i in range(length-1):
+      pt2 = tracks[-1]
+      pt1 = tracks[-i-2]
+      pred = (pt2[0]+(pt2[0]-pt1[0])/(i+1), pt2[1]+(pt2[1]-pt1[1])/(i+1))
+      next_pos = (next_pos[0] + pred[0], next_pos[1] + pred[1])
+    return (int(next_pos[0]/(length-1)), int(next_pos[1]/(length-1)))
+  else:
+    pt2 = tracks[-1]
+    pt1 = tracks[-2]
+    return (pt2[0]*2-pt1[0], pt2[1]*2-pt1[1])
 
 if __name__ == '__main__':
 
@@ -388,6 +405,9 @@ if __name__ == '__main__':
           break
         im_in = np.array(frame)
 
+        im_in = cv2.flip(im_in, 0)
+        im_in = cv2.flip(im_in, 1)
+
         if out is None:
           fps = cap.get(cv2.CAP_PROP_FPS)
           frame_width = int(cap.get(3))
@@ -403,7 +423,6 @@ if __name__ == '__main__':
         im_in = np.concatenate((im_in,im_in,im_in), axis=2)
       # rgb -> bgr
       im = im_in[:,:,::-1]
-
       if frame_index < args.start_frame:
         continue
 
@@ -494,7 +513,7 @@ if __name__ == '__main__':
             keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
             cls_dets = cls_dets[keep.view(-1).long()]
 
-            det, score = _get_best_det(cls_dets.cpu().numpy(), pos, offset, ratio, last_ball_size, thresh=0.5)
+            det, score = _get_best_det(cls_dets.cpu().numpy(), pos, offset, ratio, last_ball_size, thresh=0.1)
             if det is not None:
               # update position
               last_det = det
@@ -521,8 +540,10 @@ if __name__ == '__main__':
         print(f'  lost {lost_count}')
 
       tracks.append(pos)
+      pos = predict(tracks)
 
-      f.write(f'{frame_index},{last_det[0]},{last_det[1]},{last_det[2]-last_det[0]},{last_det[3]-last_det[1]},{detected},{last_ball_size},{zoom_ratio}\n')
+      if detected:
+        f.write(f'{frame_index},{last_det[0]},{last_det[1]},{last_det[2]-last_det[0]},{last_det[3]-last_det[1]},{detected},{last_ball_size},{zoom_ratio}\n')
       f.flush()
 
       if lost_count >= lost_count_thresh:
@@ -536,6 +557,7 @@ if __name__ == '__main__':
           sys.stdout.write('im_detect: {:d}/{:d} {:.3f}s {:.3f}s   \r' \
                            .format(num_images + 1, len(imglist), detect_time, nms_time))
           sys.stdout.flush()
+      #cv2.waitKey(0)
 
       if vis and webcam_num == -1 and video_path == "":
           # cv2.imshow('test', im2show)
@@ -552,7 +574,8 @@ if __name__ == '__main__':
           total_toc = time.time()
           total_time = total_toc - total_tic
           frame_rate = 1 / total_time
-          print(f'[{frame_index}] [{pos[0]}, {pos[1]}] Frame rate:', frame_rate)
+          if pos is not None:
+            print(f'[{frame_index}] [{pos[0]}, {pos[1]}] Frame rate:', frame_rate)
           #if cv2.waitKey(1) & 0xFF == ord('q'):
           #    break
   if webcam_num >= 0 or video_path != "":
