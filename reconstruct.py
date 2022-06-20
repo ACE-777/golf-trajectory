@@ -72,7 +72,7 @@ class Reconstructor:
             self.diameter = vals[2]
             self.focal = vals[3]
 
-        i = 0
+        #i = 0
         #for bbox in self.tracks:
         #    filename = path + "{}".format(i+1).zfill(8) + ".jpg"
         #    img = cv2.imread(filename)
@@ -157,31 +157,33 @@ class Reconstructor:
             pt_3d = self.__convert_3d__(bbox)
             self.pts.append(pt_3d)
 
-        first_pt = self.pts[0]
+        self.first_pt = self.pts[0]
         for i in range(len(self.pts)):
             pt = self.pts[i]
-            self.pts[i] = [x1-x2 for x1,x2 in zip(pt, first_pt)]
+            self.pts[i] = [x1-x2 for x1,x2 in zip(pt, self.first_pt)]
     
-    def fit(self):
+    def fit(self, flight_time_ratio=3, x_ratio=2, distance_ratio=2.5):
         count = len(self.pts)
+        
         #tdata = np.linspace(0, count - 1, count)
-        first_frame = self.tracks[0][5]
-        tdata = np.array([bbox[5]-first_frame for bbox in self.tracks])
+        self.first_frame = self.tracks[0][5]
+        tdata = np.array([bbox[5]-self.first_frame for bbox in self.tracks])
         xdata = np.array([pt[0] for pt in self.pts])
         ydata = np.array([pt[1] for pt in self.pts])
         zdata = np.array([pt[2] for pt in self.pts])
 
         count = tdata[-1]
-        tdata = np.append(tdata, count*3)
-        xdata = np.append(xdata, 0)
+        max_count = int(count*flight_time_ratio)
+        tdata = np.append(tdata, max_count)
+        xdata = np.append(xdata, xdata[-1]*x_ratio)
         ydata = np.append(ydata, 0)
-        zdata = np.append(zdata, zdata[-1]*2.5)
+        zdata = np.append(zdata, zdata[-1]*distance_ratio)
 
         popt_x, pcov = curve_fit(funcx, tdata, xdata)
         popt_y, _ = curve_fit(funcy, tdata, ydata)
         popt_z, _ = curve_fit(funcz, tdata, zdata)
 
-        ltdata = np.linspace(0, count*3 - 1, count*3)
+        ltdata = np.linspace(0, max_count-1, max_count)
         self.xdata = funcx(ltdata, *popt_x)
         self.ydata = funcy(ltdata, *popt_y)
         self.zdata = funcz(ltdata, *popt_z)
@@ -189,7 +191,7 @@ class Reconstructor:
 
         #self.pts.append([0, 0, zdata[-1]])
         self.trajectory = []
-        for t, x, y, z in zip(tdata, xdata, ydata, zdata):
+        for t, x, y, z in zip(self.tdata, self.xdata, self.ydata, self.zdata):
             self.trajectory.append((t,x,y,z))
 
     def play(self):
@@ -253,15 +255,18 @@ class Reconstructor:
         #plt.show()
 
     def export(self):
-        f = open("trajectory.txt", "w")
-        for pt in self.pts:
-            f.write(f'{pt[0]:.6f},{pt[1]:.6f},{pt[2]:.6f}\n')
+        f = open("trajectory.csv", "w")
+        f.write('frame,x,y,z\n')
+        for pt in self.trajectory:
+            t = int(pt[0]+self.first_frame)
+            world_pt = (pt[1]+self.first_pt[0], pt[2]+self.first_pt[1], pt[3]+self.first_pt[2])
+            f.write(f'{t},{world_pt[0]:.6f},{world_pt[1]:.6f},{world_pt[2]:.6f}\n')
         f.close()
 
 if __name__ == '__main__':
     reconstructor = Reconstructor('')
     reconstructor.build(filter_depth=False)
-    reconstructor.fit()
+    reconstructor.fit(4,1,3)
     #reconstructor.play()
     #reconstructor.dump()
     reconstructor.plot()
