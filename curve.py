@@ -18,7 +18,7 @@ def x(t, a, v0):
 
 
 data_t = np.array([0, 1, 2, 3, 4])
-data_x = np.array([0, 1, 1.5, 1.8, 1.7])
+data_x = np.array([0, 1, 1.5, 1.8, 1.9])
 
 vals, cov = curve_fit(x, data_t, data_x, [-2, 1])
 a, v0 = vals
