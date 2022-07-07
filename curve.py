@@ -42,8 +42,6 @@ print('ax: {} v0: {} ay: {}, g: {}, v0y: {}'.format(ax, v0x, ay, g, v0y))
 
 t = np.linspace(0, 4, 20)
 
-# By using the matplotlib.pyplot library we plot the curve after integration
-plt.rcParams.update({'font.size': 14})  # increase the font size
 plt.xlabel("x")
 plt.ylabel("y")
 plt.title("x'' = ax * (x')^2, y'' = ay * (y')^2 - g")
