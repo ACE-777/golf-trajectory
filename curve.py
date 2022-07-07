@@ -40,8 +40,9 @@ def y(t, a, g, v0, y0):
 
 def ksi(t, xa, za, xv0, zv0, x0, z0):
     z_value = z(t, za, zv0, z0)
+    z_val = np.array(z_value)
     z_value[z_value == 0] = 0.0000001
-    return focal * (vx(t, xa, xv0) * z_value - x(t, xa, xv0, x0) * vz(t, za, zv0)) / z_value ** 2
+    return focal * (vx(t, xa, xv0) * z_val - x(t, xa, xv0, x0) * vz(t, za, zv0)) / z_value ** 2
 
 
 def eta(t, ya, za, yv0, zv0, y0, z0, g):
@@ -113,28 +114,33 @@ def fit_2d():
     track_ksi = track[:, 0]
     track_eta = np.array(list(map(lambda y: 2000 - y, track[:, 1])))
     track_t = np.array(range(len(track)))
-    vals_x, _ = curve_fit(ksi, track_t, track_ksi, [-0.2, -0.2, 10, 10, 0, 0])
+
+    # z0 = 1
+    # def ksi_fixed(t, xa, za, xv0, zv0, x0):
+    #     return ksi(t, xa, za, xv0, zv0, x0, z0)
+
+    vals_x, _ = curve_fit(ksi, track_t, track_ksi, [-0.2, -0.2, 10, 10, 0, 1])
     xa, za, xv0, zv0, x0, z0 = vals_x
 
-    def eta_fixed(t, ya, yv0, y0):
-        return eta(t, ya, za, yv0, zv0, y0, z0, -10)
+    def eta_fixed(t, ya, yv0, y0, g):
+        return eta(t, ya, za, yv0, zv0, y0, z0, g)
 
-    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-0.2, 10, 0])
-    ya, yv0, y0 = vals_y
+    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-0.2, 10, 0, -10])
+    ya, yv0, y0, g = vals_y
     print('xa {}, za {}, xv0 {}, zv0 {}, x0 {}, z0 {}'.format(xa, za, xv0, zv0, x0, z0))
 
-    t = np.linspace(0, 4, 20)
+    t = np.linspace(0, len(track), 20)
 
     plt.xlabel("ksi")
     plt.ylabel("eta")
     plt.title("x'' = ax * (x')^2, y'' = ay * (y')^2 - g")
     plt.plot(
         track_ksi, track_eta, '.',
-        ksi(t, xa, za, xv0, zv0, x0, z0), eta(t, ya, za, yv0, zv0, y0, z0, -10), '-'
+        ksi(t, xa, za, xv0, zv0, x0, z0), eta(t, ya, za, yv0, zv0, y0, z0, g), '-'
     )
     plt.show()
 
 
 focal = 0.13
-fit_3d()
-# fit_2d()
+# fit_3d()
+fit_2d()
