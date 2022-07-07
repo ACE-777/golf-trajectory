@@ -128,6 +128,7 @@ def fit_2d():
     vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-0.2, 10, 0, -10])
     ya, yv0, y0, g = vals_y
     print('xa {}, za {}, xv0 {}, zv0 {}, x0 {}, z0 {}'.format(xa, za, xv0, zv0, x0, z0))
+    print('ya {}, yv0 {}, y0 {}, g {}'.format(ya, yv0, y0, g))
 
     t = np.linspace(0, len(track), 20)
 
@@ -141,6 +142,6 @@ def fit_2d():
     plt.show()
 
 
-focal = 0.13
+focal = 0.013
 # fit_3d()
 fit_2d()
