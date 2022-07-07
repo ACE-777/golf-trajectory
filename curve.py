@@ -121,14 +121,15 @@ def fit_2d():
 
     vals_x, _ = curve_fit(ksi, track_t, track_ksi, [-0.2, -0.2, 10, 10, 0, 1])
     xa, za, xv0, zv0, x0, z0 = vals_x
+    g = -9.8
 
-    def eta_fixed(t, ya, yv0, y0, g):
+    def eta_fixed(t, ya, yv0, y0):
         return eta(t, ya, za, yv0, zv0, y0, z0, g)
 
-    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-0.2, 10, 0, -10])
-    ya, yv0, y0, g = vals_y
+    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-0.2, 10, 0])
+    ya, yv0, y0 = vals_y
     print('xa {}, za {}, xv0 {}, zv0 {}, x0 {}, z0 {}'.format(xa, za, xv0, zv0, x0, z0))
-    print('ya {}, yv0 {}, y0 {}, g {}'.format(ya, yv0, y0, g))
+    print('ya {}, yv0 {}, y0 {}'.format(ya, yv0, y0))
 
     t = np.linspace(0, len(track), 20)
 
