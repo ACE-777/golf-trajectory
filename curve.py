@@ -131,15 +131,22 @@ def fit_2d():
     print('xa {}, za {}, xv0 {}, zv0 {}, x0 {}, z0 {}'.format(xa, za, xv0, zv0, x0, z0))
     print('ya {}, yv0 {}, y0 {}'.format(ya, yv0, y0))
 
-    t = np.linspace(0, len(track), 20)
+    t = np.linspace(0, len(track) + 10, 20)
 
-    plt.xlabel("ksi")
-    plt.ylabel("eta")
-    plt.title("x'' = ax * (x')^2, y'' = ay * (y')^2 - g")
-    plt.plot(
+    fig, axs = plt.subplots(2)
+    fig.suptitle('3d and camera projection')
+
+    axs[0].set(xlabel='ksi', ylabel='eta')
+    axs[0].plot(
         track_ksi, track_eta, '.',
         ksi(t, xa, za, xv0, zv0, x0, z0), eta(t, ya, za, yv0, zv0, y0, z0, g), '-'
     )
+
+    axs[1].set(xlabel='z', ylabel='y')
+    axs[1].plot(
+        z(t, za, zv0, z0), y(t, ya, g, yv0, y0), '-'
+    )
+
     plt.show()
 
 
