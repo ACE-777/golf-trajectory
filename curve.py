@@ -26,7 +26,7 @@ def z(t, a, v0, z0):
 
 
 def dvy(v, t, a, g):
-    return a * v * v - g
+    return a * v * v + g
 
 
 def vy(t, a, g, v0):
@@ -108,32 +108,86 @@ def fit_2d():
         [174.96, 655.97],
         [175.34, 659.41],
         [175.45, 663.97],
-        [175.56, 668.54]
+        [175.56, 668.54],
+
+        [176.71, 625.60],
+        [175.71, 626.36],
+        [175.87, 628.42],
+        [175.21, 630.60],
+        [174.94, 633.30],
+        [174.83, 635.32],
+        [174.87, 638.74],
+        [174.74, 641.57],
+        [174.61, 644.45],
+        [174.73, 648.29],
+        [174.85, 652.13],
+        [174.96, 655.97],
+        [175.34, 659.41],
+        [175.45, 663.97],
+        [175.56, 668.54],
+        [175.67, 673.30],
+        [175.77, 678.07],
+        [175.88, 682.83],
+        [176.02, 688.10],
+        [176.60, 692.91],
+        [176.72, 698.14],
+        [176.84, 703.38],
+        [177.19, 708.89],
+        [177.53, 714.40],
+        [177.84, 719.92],
+        [178.15, 725.43],
+        [178.46, 731.46],
+        [179.10, 737.57],
+        [179.08, 743.04],
+        [180.10, 749.40],
+        [179.48, 755.04],
+        [179.98, 761.14],
+        [180.58, 768.14],
+        [180.99, 774.76],
+        [181.40, 781.37],
+        [181.81, 787.99],
+        [182.23, 794.60],
+        [182.64, 801.22],
+        [183.05, 807.83],
+        [183.79, 815.05],
+        [184.54, 822.26],
+        [184.92, 829.45],
+        [185.29, 836.63],
+        [185.67, 843.82],
+        [186.05, 851.01],
+        [186.42, 858.19],
+        [186.80, 865.38],
+        [187.18, 872.57],
+        [187.55, 880.13],
+        [187.93, 887.69]
     ])
 
-    track_ksi = track[:, 0]
-    track_eta = np.array(list(map(lambda y: 2000 - y, track[:, 1])))
+    track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
+    track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
     track_t = np.array(range(len(track)))
 
-    # z0 = 1
-    # def ksi_fixed(t, xa, za, xv0, zv0, x0):
-    #     return ksi(t, xa, za, xv0, zv0, x0, z0)
+    z0 = 10
+    zv0 = 20
 
-    vals_x, _ = curve_fit(ksi, track_t, track_ksi, [-0.2, -0.2, 10, 10, 0, 1])
-    xa, za, xv0, zv0, x0, z0 = vals_x
-    g = -9.8
+    def ksi_fixed(t, xa, za, xv0, x0):
+        return ksi(t, xa, za, xv0, zv0, x0, z0)
 
-    def eta_fixed(t, ya, yv0, y0):
+    vals_x, _ = curve_fit(ksi_fixed, track_t, track_ksi, [-1, -0.5, 10, 0])
+    xa, za, xv0, x0 = vals_x
+
+    # g = -9.8
+
+    def eta_fixed(t, ya, yv0, y0, g):
         return eta(t, ya, za, yv0, zv0, y0, z0, g)
 
-    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-0.2, 10, 0])
-    ya, yv0, y0 = vals_y
+    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-1, 10, -100, -9.8])
+    ya, yv0, y0, g = vals_y
     print('xa {}, za {}, xv0 {}, zv0 {}, x0 {}, z0 {}'.format(xa, za, xv0, zv0, x0, z0))
-    print('ya {}, yv0 {}, y0 {}'.format(ya, yv0, y0))
+    print('ya {}, yv0 {}, y0 {}, g {}'.format(ya, yv0, y0, g))
 
     t = np.linspace(0, len(track) + 10, 20)
 
-    fig, axs = plt.subplots(2)
+    fig, axs = plt.subplots(3)
     fig.suptitle('3d and camera projection')
 
     axs[0].set(xlabel='ksi', ylabel='eta')
@@ -145,6 +199,11 @@ def fit_2d():
     axs[1].set(xlabel='z', ylabel='y')
     axs[1].plot(
         z(t, za, zv0, z0), y(t, ya, g, yv0, y0), '-'
+    )
+
+    axs[2].set(xlabel='t', ylabel='z')
+    axs[2].plot(
+        t, z(t, za, zv0, z0), '-'
     )
 
     plt.show()
