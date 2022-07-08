@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import odeint, quad
 from scipy.optimize import curve_fit
 from math import exp, log, cosh, sqrt
 
@@ -9,16 +8,21 @@ from math import exp, log, cosh, sqrt
 # x - horizontal
 # y - vertical
 
-def x(t, tau, v0, val0): return v0 * tau * log(1 + t / tau) + val0
-def z(t, m, c_drag, v0, val0):
+def horizontal_drag_coord(t, m, c_drag, v0, val0):
+    if v0 == 0:
+        return val0
     tau = m / c_drag * v0
-    ln = np.array([log(1 + ti / tau) for ti in t])
+    temp = (1 + t / tau)
+    temp[temp < 0] = 1
+    ln = np.array([log(val) for val in temp])
     return v0 * tau * ln + val0
 
+x = horizontal_drag_coord
+z = horizontal_drag_coord
 def y(t, m, a, b, y0): return a * m * t**2 + b * t + y0
 
-def ksi(t, xa, xv0, x0, za, zv0, z0): return focal * x(t, xa, xv0, x0) / z(t, za, zv0, z0)
-def eta(t, ya, yv0, y0, za, zv0, z0, g): return focal * y(t, ya, yv0, y0, g) / z(t, za, zv0, z0)
+def ksi(t, m, c_drag, xv0, x0, zv0, z0): return focal * x(t, m, c_drag, xv0, x0) / z(t, m, c_drag, zv0, z0)
+def eta(t, m, a, b, y0, c_drag, zv0, z0): return focal * y(t, m, a, b, y0) / z(t, m, c_drag, zv0, z0)
 
 
 def fit_3d():
@@ -73,18 +77,17 @@ def fit_2d():
     track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6])
 
     g = -9.8
-    ksi_param_bounds = (None, [None, None, None, None, None, 100])
+    ksi_param_bounds = ((0, 0.5, -30, -5, 50, 0), (1, 15, 30, 5, 80, 10))
+    vals_ksi, _ = curve_fit(ksi, track_t, track_ksi)
+    m, c_drag, xv0, x0, zv0, z0 = vals_ksi
 
-    vals_x, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds)
-    xa, xv0, x0, za, zv0, z0 = vals_x
+    print('m {}, c_drag {}, xv0 {}, x0 {}, zv0 {}, z0 {}'.format(m, c_drag, xv0, x0, zv0, z0))
 
-    def eta_fixed(t, ya, yv0, y0):
-        return eta(t, ya, yv0, y0, za, zv0, z0, g)
+    def eta_fixed(t, a, b, y0):
+        return eta(t, m, a, b, y0, c_drag, zv0, z0)
 
-    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta)
-    ya, yv0, y0 = vals_y
-    print('xa {}, za {}, xv0 {}, zv0 {}, x0 {}, z0 {}'.format(xa, za, xv0, zv0, x0, z0))
-    print('ya {}, yv0 {}, y0 {}, g {}'.format(ya, yv0, y0, g))
+    vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta)
+    a, b, y0 = vals_eta
 
     t = np.linspace(0, 2, 20)
 
@@ -94,22 +97,22 @@ def fit_2d():
     axs[0].set(xlabel='ksi', ylabel='eta')
     axs[0].plot(
         track_ksi, track_eta, '.',
-        ksi(t, xa, za, xv0, zv0, x0, z0), eta(t, ya, yv0, y0, za, zv0, z0, g), '-'
+        ksi(t, m, c_drag, xv0, x0, zv0, z0), eta(t, m, a, b, y0, c_drag, zv0, z0), '-'
     )
 
     axs[1].set(xlabel='t', ylabel='y')
     axs[1].plot(
-        t, y(t, ya, g, yv0, y0), '-'
+        t, y(t, m, a, b, y0), '-'
     )
 
     axs[2].set(xlabel='t', ylabel='z')
     axs[2].plot(
-        t, z(t, za, zv0, z0), '-'
+        t, z(t, m, c_drag, zv0, z0), '-'
     )
 
     plt.show()
 
 
 focal = 0.013
-fit_3d()
-# fit_2d()
+# fit_3d()
+fit_2d()
