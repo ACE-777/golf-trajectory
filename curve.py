@@ -101,9 +101,9 @@ def fit_2d():
         ksi(t, xa, za, xv0, zv0, x0, z0), eta(t, ya, yv0, y0, za, zv0, z0, g), '-'
     )
 
-    axs[1].set(xlabel='z', ylabel='y')
+    axs[1].set(xlabel='t', ylabel='y')
     axs[1].plot(
-        z(t, za, zv0, z0), y(t, ya, g, yv0, y0), '-'
+        t, y(t, ya, g, yv0, y0), '-'
     )
 
     axs[2].set(xlabel='t', ylabel='z')
