@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint, quad
 from scipy.optimize import curve_fit
-from math import exp, log, cosh
+from math import exp, log, cosh, sqrt
 
 
 # z - from the camera to the far
@@ -15,7 +15,7 @@ def z(t, m, c_drag, v0, val0):
     ln = np.array([log(1 + ti / tau) for ti in t])
     return v0 * tau * ln + val0
 
-def y(t, a, b, y0): return a * t**2 + b * t + y0
+def y(t, m, a, b, y0): return a * m * t**2 + b * t + y0
 
 def ksi(t, xa, xv0, x0, za, zv0, z0): return focal * x(t, xa, xv0, x0) / z(t, za, zv0, z0)
 def eta(t, ya, yv0, y0, za, zv0, z0, g): return focal * y(t, ya, yv0, y0, g) / z(t, za, zv0, z0)
@@ -26,12 +26,14 @@ def fit_3d():
     data_z = np.array([0, 10, 15, 18, 19])
     data_y = np.array([1, 5, 7, 7, 6])
     vals_z, _ = curve_fit(z, data_t, data_z)
-    vals_y, _ = curve_fit(y, data_t, data_y)
-    m, c_drag, v0, val0 = vals_z
+    m, c_drag, zv0, z0 = vals_z
+
+    def y_fixed(t, a, b, y0): return y(t, m, a, b, y0)
+    vals_y, _ = curve_fit(y_fixed, data_t, data_y)
     a, b, y0 = vals_y
 
     print(vals_z)
-    print(z(data_t, m, c_drag, v0, val0))
+    print(z(data_t, m, c_drag, zv0, z0))
 
     t = np.linspace(0, 2, 20)
 
@@ -41,17 +43,17 @@ def fit_3d():
     axs[0].set(xlabel='z', ylabel='y')
     axs[0].plot(
         data_z, data_y, '.',
-        z(t, m, c_drag, v0, val0), y(t, a, b, y0), '-'
+        z(t, m, c_drag, zv0, z0), y(t, m, a, b, y0), '-'
     )
 
     axs[1].set(xlabel='t', ylabel='y')
     axs[1].plot(
-        t,  y(t, a, b, y0), '-'
+        t,  y(t, m, a, b, y0), '-'
     )
 
     axs[2].set(xlabel='t', ylabel='z')
     axs[2].plot(
-        t, z(t, m, c_drag, v0, val0), '-'
+        t, z(t, m, c_drag, zv0, z0), '-'
     )
     plt.show()
 
