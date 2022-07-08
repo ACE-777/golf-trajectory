@@ -83,7 +83,7 @@ def fit_2d():
 
     t = np.linspace(0, 2, 20)
 
-    fig, axs = plt.subplots(3)
+    fig, axs = plt.subplots(5)
     fig.suptitle('3d and camera projection')
 
     axs[0].set(xlabel='ksi', ylabel='eta')
@@ -102,9 +102,19 @@ def fit_2d():
         t, z(t, za, zv0, z0), '-'
     )
 
+    axs[3].set(xlabel='t', ylabel='ksi')
+    axs[3].plot(
+        t, ksi(t, xa, za, xv0, zv0, x0, z0), '-'
+    )
+
+    axs[4].set(xlabel='t', ylabel='eta')
+    axs[4].plot(
+        t, eta(t, ya, yv0, y0, za, zv0, z0, g), '-'
+    )
+
     plt.show()
 
 
 focal = 0.013
-fit_3d()
-# fit_2d()
+# fit_3d()
+fit_2d()
