@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.optimize import curve_fit
 
+
 # z - from the camera to the far
 # x - horizontal
 # y - vertical
@@ -72,15 +73,11 @@ def fit_2d():
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
     track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6])
 
-    z0 = 5
-    zv0 = 10
     g = -9.8
+    ksi_param_bounds = (None, [None, None, None, None, None, 100])
 
-    def ksi_fixed(t, xa, xv0, x0, za):
-        return ksi(t, xa, xv0, x0, za, zv0, z0)
-
-    vals_x, _ = curve_fit(ksi_fixed, track_t, track_ksi)
-    xa, xv0, x0, za = vals_x
+    vals_x, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds)
+    xa, xv0, x0, za, zv0, z0 = vals_x
 
     def eta_fixed(t, ya, yv0, y0):
         return eta(t, ya, yv0, y0, za, zv0, z0, g)
