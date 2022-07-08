@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import odeint
+from scipy.integrate import odeint, quad
 from scipy.optimize import curve_fit
 
 
@@ -13,7 +13,11 @@ def vx(t, a, v0): return odeint(dvx, v0, t, args=(a,)).ravel()
 def x(t, a, v0, x0): return vx(t, a, v0) * t + x0
 
 def vz(t, a, v0): return odeint(dvx, v0, t, args=(a,)).ravel()
-def z(t, a, v0, z0): return vx(t, a, v0) * t + z0
+def z_scalar(t, a, v0, z0):
+    print(t, a)
+    return vz(t, a, v0) * t + z0
+def z(t, a, v0, z0):
+    return np.array([quad(z_scalar, 0, ti, args=(a, v0, z0)) for ti in t])
 
 def dvy(v, t, a, g): return a * v * v + g
 def vy(t, a, g, v0): return odeint(dvy, v0, t, args=(a, g)).ravel()
@@ -38,7 +42,7 @@ def eta(t, ya, yv0, y0, za, zv0, z0, g): return focal * y(t, ya, yv0, y0, g) / z
 
 
 def fit_3d():
-    data_t = np.array([0, 1, 2, 3, 4])
+    data_t = np.array([0, 0.3, 0.6, 0.9, 1.2])
     data_z = np.array([0, 10, 15, 18, 19])
     data_y = np.array([1, 5, 7, 7, 6])
     vals_z, _ = curve_fit(x, data_t, data_z, [-0.2, 10, 0])
