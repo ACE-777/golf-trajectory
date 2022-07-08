@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.optimize import curve_fit
 
+# z - from the camera to the far
+# x - horizontal
+# y - vertical
 
 def dvx(v, t, a): return a * v * v
 def vx(t, a, v0): return odeint(dvx, v0, t, args=(a,)).ravel()
