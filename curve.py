@@ -79,13 +79,13 @@ def fit_2d():
     def ksi_fixed(t, xa, xv0, x0, za):
         return ksi(t, xa, xv0, x0, za, zv0, z0)
 
-    vals_x, _ = curve_fit(ksi_fixed, track_t, track_ksi, [-1, 1, 0, -0.2])
+    vals_x, _ = curve_fit(ksi_fixed, track_t, track_ksi)
     xa, xv0, x0, za = vals_x
 
     def eta_fixed(t, ya, yv0, y0):
         return eta(t, ya, yv0, y0, za, zv0, z0, g)
 
-    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta, [-1, 10, 1])
+    vals_y, _ = curve_fit(eta_fixed, track_t, track_eta)
     ya, yv0, y0 = vals_y
     print('xa {}, za {}, xv0 {}, zv0 {}, x0 {}, z0 {}'.format(xa, za, xv0, zv0, x0, z0))
     print('ya {}, yv0 {}, y0 {}, g {}'.format(ya, yv0, y0, g))
