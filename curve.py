@@ -44,17 +44,28 @@ def fit_3d():
     vals_z, _ = curve_fit(x, data_t, data_z, [-0.2, 10, 0])
     vals_y, _ = curve_fit(y, data_t, data_y, [-0.2, -10, 10, 1])
     za, zv0, z0 = vals_z
-    ay, g, v0y, y0 = vals_y
-    print('za: {} zv0: {} ay: {}, g: {}, v0y: {}'.format(za, zv0, ay, g, v0y))
+    ya, yv0, y0, g = vals_y
+    print('za {}, zv0 {}, ya {}, yv0 {}, g {}'.format(za, zv0, ya, yv0, g))
 
     t = np.linspace(0, 4, 20)
 
-    plt.xlabel("z")
-    plt.ylabel("y")
-    plt.title("z'' = az * (z')^2, y'' = ay * (y')^2 - g")
-    plt.plot(
+    fig, axs = plt.subplots(3)
+    fig.suptitle('3d coordinates')
+
+    axs[0].set(xlabel='z', ylabel='y')
+    axs[0].plot(
         data_z, data_y, '.',
-        x(t, za, zv0, z0), y(t, ay, g, v0y, y0), '-'
+        z(t, za, zv0, z0), y(t, ya, yv0, y0, g), '-'
+    )
+
+    axs[1].set(xlabel='t', ylabel='y')
+    axs[1].plot(
+        t,  y(t, ya, yv0, y0, g), '-'
+    )
+
+    axs[2].set(xlabel='t', ylabel='z')
+    axs[2].plot(
+        t, z(t, za, zv0, z0), '-'
     )
     plt.show()
 
@@ -112,5 +123,5 @@ def fit_2d():
 
 
 focal = 0.013
-# fit_3d()
-fit_2d()
+fit_3d()
+# fit_2d()
