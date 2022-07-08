@@ -12,30 +12,37 @@ def dvx(v, t, a): return a * v * v
 def vx(t, a, v0): return odeint(dvx, v0, t, args=(a,)).ravel()
 def x(t, a, v0, x0): return vx(t, a, v0) * t + x0
 
-def vz(t, a, v0): return odeint(dvx, v0, t, args=(a,)).ravel()
-def z_scalar(t, a, v0, z0):
-    print(t, a)
-    return vz(t, a, v0) * t + z0
+def dvz(v, t, a): return a * v * v
+def vz(t, a, v0): return odeint(dvz, v0, t, args=(a,)).ravel()
 def z(t, a, v0, z0):
-    return np.array([quad(z_scalar, 0, ti, args=(a, v0, z0)) for ti in t])
+    res = [z0]
+    acc = z0
+    last_t = 0
+    last_v = v0
+    for i in t:
+        if i == 0:
+            continue
+        v = vz([i], a, v0)
+        acc += ((v - last_v) / (i - last_t))[0]
+        res.append(acc)
+        last_v = v
+    return res
 
 def dvy(v, t, a, g): return a * v * v + g
 def vy(t, a, g, v0): return odeint(dvy, v0, t, args=(a, g)).ravel()
-def y(t, a, g, v0, y0): return vy(t, a, g, v0) * t + y0
-
-
-# def d_ksi(t, xa, xv0, x0, za, zv0, z0):
-#     z_value = z(t, za, zv0, z0)
-#     z_val = np.array(z_value)
-#     z_value[z_value == 0] = 0.0000001
-#     return focal * (vx(t, xa, xv0) * z_val - x(t, xa, xv0, x0) * vz(t, za, zv0)) / z_value ** 2
-#
-#
-# def d_eta(t, ya, za, yv0, zv0, y0, z0, g):
-#     z_value = z(t, za, zv0, z0)
-#     z_value[z_value == 0] = 0.0000001
-#     return focal * (vy(t, ya, g, yv0) * z_value - y(t, ya, g, yv0, y0) * vz(t, za, zv0)) / z_value ** 2
-
+def y(t, a, g, v0, y0):
+    res = [y0]
+    acc = y0
+    last_t = 0
+    last_v = v0
+    for i in t:
+        if i == 0:
+            continue
+        v = vy([i], a, g, v0)
+        acc += ((v - last_v) / (i - last_t))[0]
+        res.append(acc)
+        last_v = v
+    return res
 
 def ksi(t, xa, xv0, x0, za, zv0, z0): return focal * x(t, xa, xv0, x0) / z(t, za, zv0, z0)
 def eta(t, ya, yv0, y0, za, zv0, z0, g): return focal * y(t, ya, yv0, y0, g) / z(t, za, zv0, z0)
@@ -45,13 +52,13 @@ def fit_3d():
     data_t = np.array([0, 0.3, 0.6, 0.9, 1.2])
     data_z = np.array([0, 10, 15, 18, 19])
     data_y = np.array([1, 5, 7, 7, 6])
-    vals_z, _ = curve_fit(x, data_t, data_z, [-0.2, 10, 0])
-    vals_y, _ = curve_fit(y, data_t, data_y, [-0.2, -10, 10, 1])
+    vals_z, _ = curve_fit(x, data_t, data_z)
+    vals_y, _ = curve_fit(y, data_t, data_y)
     za, zv0, z0 = vals_z
     ya, yv0, y0, g = vals_y
     print('za {}, zv0 {}, ya {}, yv0 {}, g {}'.format(za, zv0, ya, yv0, g))
 
-    t = np.linspace(0, 4, 20)
+    t = np.linspace(0, 2, 20)
 
     fig, axs = plt.subplots(3)
     fig.suptitle('3d coordinates')
