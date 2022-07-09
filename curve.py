@@ -21,8 +21,8 @@ x = horizontal_drag_coord
 z = horizontal_drag_coord
 def y(t, m, a, b, y0): return a * m * t**2 + b * t + y0
 
-def ksi(t, m, c_drag, xv0, x0, zv0, z0): return focal * x(t, m, c_drag, xv0, x0) / z(t, m, c_drag, zv0, z0)
-def eta(t, m, a, b, y0, c_drag, zv0, z0): return focal * y(t, m, a, b, y0) / z(t, m, c_drag, zv0, z0)
+def ksi(t, m, c_drag_x, c_drag_z, xv0, x0, zv0, z0): return focal * x(t, m, c_drag_x, xv0, x0) / z(t, m, c_drag_z, zv0, z0)
+def eta(t, m, a, b, y0, c_drag_z, zv0, z0): return focal * y(t, m, a, b, y0) / z(t, m, c_drag_z, zv0, z0)
 
 
 def fit_3d():
@@ -69,27 +69,30 @@ def fit_2d():
         [175.71, 626.36],
         [174.96, 655.97],
         [179.48, 755.04],
-        [184.92, 829.45]
+        [184.92, 829.45],
+        [188.68, 902.82]
     ])
 
     track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
-    track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6])
+    track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6, 1.9])
 
     g = -9.8
-    ksi_param_bounds = ((0, 0.5, -30, -5, 50, 0), (1, 15, 30, 5, 80, 10))
-    vals_ksi, _ = curve_fit(ksi, track_t, track_ksi)
-    m, c_drag, xv0, x0, zv0, z0 = vals_ksi
+    # ksi_param_bounds = ((0, 0.5, -30, -5, 50, 0), (1, 15, 30, 5, 80, 10))
+    ksi_param_bounds = ((0, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, 0),
+                        (0.5, np.inf, np.inf, np.inf, np.inf, np.inf, 10))
+    vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds)
+    m, c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
-    print('m {}, c_drag {}, xv0 {}, x0 {}, zv0 {}, z0 {}'.format(m, c_drag, xv0, x0, zv0, z0))
+    print('m {}, c_drag_x {}, c_drag_z {} xv0 {}, x0 {}, zv0 {}, z0 {}'.format(m, c_drag_x, c_drag_z, xv0, x0, zv0, z0))
 
     def eta_fixed(t, a, b, y0):
-        return eta(t, m, a, b, y0, c_drag, zv0, z0)
+        return eta(t, m, a, b, y0, c_drag_z, zv0, z0)
 
     vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta)
     a, b, y0 = vals_eta
 
-    t = np.linspace(0, 2, 20)
+    t = np.linspace(0, 4, 20)
 
     fig, axs = plt.subplots(3)
     fig.suptitle('3d and camera projection')
@@ -97,7 +100,7 @@ def fit_2d():
     axs[0].set(xlabel='ksi', ylabel='eta')
     axs[0].plot(
         track_ksi, track_eta, '.',
-        ksi(t, m, c_drag, xv0, x0, zv0, z0), eta(t, m, a, b, y0, c_drag, zv0, z0), '-'
+        ksi(t, m, c_drag_x, c_drag_z, xv0, x0, zv0, z0), eta(t, m, a, b, y0, c_drag_z, zv0, z0), '-'
     )
 
     axs[1].set(xlabel='t', ylabel='y')
@@ -107,7 +110,7 @@ def fit_2d():
 
     axs[2].set(xlabel='t', ylabel='z')
     axs[2].plot(
-        t, z(t, m, c_drag, zv0, z0), '-'
+        t, z(t, m, c_drag_z, zv0, z0), '-'
     )
 
     plt.show()
