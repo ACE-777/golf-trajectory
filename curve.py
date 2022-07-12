@@ -67,10 +67,9 @@ def fit_3d():
     plt.show()
 
 
-def fit_2d(track):
+def fit_2d(track, track_t):
     track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
-    track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6, 1.9])
 
     # ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
     #                     (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
