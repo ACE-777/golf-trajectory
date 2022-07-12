@@ -112,7 +112,6 @@ def fit_2d(track):
 
 
 def fit_2d_simple():
-    g = -9.8
     ksi_param_bounds = ((-np.inf, -np.inf, -np.inf),
                         (np.inf, np.inf, np.inf))
     vals_ksi, _ = curve_fit(ksi_simple, track_t, track_ksi, bounds=ksi_param_bounds)
