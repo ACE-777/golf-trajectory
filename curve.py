@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from math import exp, log, cosh, sqrt
 
+focal = 0.013
+pixel_to_meter = 1920 / 0.03
 
 # z - from the camera to the far
 # x - horizontal
@@ -65,7 +67,11 @@ def fit_3d():
     plt.show()
 
 
-def fit_2d():
+def fit_2d(track):
+    track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
+    track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
+    track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6, 1.9])
+
     # ksi_param_bounds = ((0, 0.5, -30, -5, 50, 0), (1, 15, 30, 5, 80, 10))
     ksi_param_bounds = ((0, -np.inf, -np.inf, -50, -20, 0, 0),
                         (1, np.inf, np.inf,    50, 20, 100, 10))
@@ -127,23 +133,3 @@ def fit_2d_simple():
 
     plt.show()
 
-focal = 0.013
-pixel_to_meter = 1920 / 0.03
-track = np.array([
-    [323.80, 1093.22],
-    [187.68, 640.46],
-    [175.71, 626.36],
-    [174.96, 655.97],
-    [179.48, 755.04],
-    [184.92, 829.45],
-    [188.68, 902.82]
-])
-
-track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
-track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
-track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6, 1.9])
-
-# test_ksi = focal * 10 / 20 * pixel_to_meter
-# print(test_ksi)
-# fit_3d()
-fit_2d()
