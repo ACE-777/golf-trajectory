@@ -1,7 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from math import exp, log, cosh, sqrt
 from curve import fit_2d
 
 track = np.array([
@@ -14,7 +11,14 @@ track = np.array([
     [188.68, 902.82]
 ])
 
-# test_ksi = focal * 10 / 20 * pixel_to_meter
-# print(test_ksi)
-# fit_3d()
-fit_2d(track)
+track2 = np.array([
+    [571.50, 954.66],
+    [530.44, 791.04],
+    [509.41, 703.11],
+    [494.57, 647.75],
+    [483.32, 611.30],
+    [477.30, 583.73],
+    [403.93, 474.01],
+])
+
+fit_2d(track2)
