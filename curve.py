@@ -25,6 +25,9 @@ def ksi(t, m, c_drag_x, c_drag_z, xv0, x0, zv0, z0): return focal * x(t, m, c_dr
 def eta(t, m, a, b, y0, c_drag_z, zv0, z0): return focal * y(t, m, a, b, y0) / z(t, m, c_drag_z, zv0, z0) * pixel_to_meter
 
 
+def ksi_simple(t, a, b, ksi0): return a * t**2 + b * t + ksi0
+def eta_simple(t, a, b, eta0): return a * t**2 + b * t + eta0
+
 def fit_3d():
     data_t = np.array([0, 0.3, 0.6, 0.9, 1.2])
     data_z = np.array([0, 10, 15, 18, 19])
@@ -63,20 +66,6 @@ def fit_3d():
 
 
 def fit_2d():
-    track = np.array([
-        [323.80, 1093.22],
-        [187.68, 640.46],
-        [175.71, 626.36],
-        [174.96, 655.97],
-        [179.48, 755.04],
-        [184.92, 829.45],
-        [188.68, 902.82]
-    ])
-
-    track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
-    track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
-    track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6, 1.9])
-
     g = -9.8
     # ksi_param_bounds = ((0, 0.5, -30, -5, 50, 0), (1, 15, 30, 5, 80, 10))
     ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
@@ -116,8 +105,45 @@ def fit_2d():
     plt.show()
 
 
+def fit_2d_simple():
+    g = -9.8
+    ksi_param_bounds = ((-np.inf, -np.inf, -np.inf),
+                        (np.inf, np.inf, np.inf))
+    vals_ksi, _ = curve_fit(ksi_simple, track_t, track_ksi, bounds=ksi_param_bounds)
+    ksi_a, ksi_b, ksi0 = vals_ksi
+
+    vals_eta, _ = curve_fit(eta_simple, track_t, track_eta)
+    eta_a, eta_b, eta0 = vals_eta
+
+    t = np.linspace(0, 4, 20)
+
+    fig, axs = plt.subplots(1)
+    fig.suptitle('3d and camera projection')
+
+    axs.set(xlabel='ksi', ylabel='eta')
+    axs.plot(
+        track_ksi, track_eta, '.',
+        ksi_simple(t, ksi_a, ksi_b, ksi0), eta_simple(t, eta_a, eta_b, eta0), '-'
+    )
+
+    plt.show()
+
 focal = 0.013
 pixel_to_meter = 1920 / 0.03
+track = np.array([
+    [323.80, 1093.22],
+    [187.68, 640.46],
+    [175.71, 626.36],
+    [174.96, 655.97],
+    [179.48, 755.04],
+    [184.92, 829.45],
+    [188.68, 902.82]
+])
+
+track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
+track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
+track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6, 1.9])
+
 # test_ksi = focal * 10 / 20 * pixel_to_meter
 # print(test_ksi)
 # fit_3d()
