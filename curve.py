@@ -69,16 +69,14 @@ def fit_3d():
 
 def fit_2d(track, track_t, extrapolate_to=None):
     if extrapolate_to is None:
-        extrapolate_to = track_t[-1]*2
+        extrapolate_to = track_t[-1] * 3
     t = np.linspace(0, extrapolate_to, 20)
 
     track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
 
-    ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
-                        (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
-    # ksi_param_bounds = ((0, -np.inf, -np.inf, -50, -20, 0, 0),
-    #                     (1, np.inf, np.inf,    50, 20, 100, 10))
+    ksi_param_bounds = ((0, -np.inf, -50, -np.inf, -np.inf, 0, 0),
+                        (0.5, np.inf, 0, np.inf, np.inf, 100, 20))
     vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds, method='trf')
     m, c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
