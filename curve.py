@@ -66,11 +66,10 @@ def fit_3d():
 
 
 def fit_2d():
-    g = -9.8
     # ksi_param_bounds = ((0, 0.5, -30, -5, 50, 0), (1, 15, 30, 5, 80, 10))
-    ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
-                        (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
-    vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds)
+    ksi_param_bounds = ((0, -np.inf, -np.inf, -50, -20, 0, 0),
+                        (1, np.inf, np.inf,    50, 20, 100, 10))
+    vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds, method='trf')
     m, c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
     print('m {}, c_drag_x {}, c_drag_z {} xv0 {}, x0 {}, zv0 {}, z0 {}'.format(m, c_drag_x, c_drag_z, xv0, x0, zv0, z0))
@@ -78,7 +77,7 @@ def fit_2d():
     def eta_fixed(t, a, b, y0):
         return eta(t, m, a, b, y0, c_drag_z, zv0, z0)
 
-    vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta)
+    vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta, method='trf')
     a, b, y0 = vals_eta
 
     t = np.linspace(0, 4, 20)
