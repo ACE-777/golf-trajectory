@@ -72,10 +72,10 @@ def fit_2d(track):
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
     track_t = np.array([0, 0.33, 0.66, 0.99, 1.3, 1.6, 1.9])
 
-    ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
-                        (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
-    # ksi_param_bounds = ((0, -np.inf, -np.inf, -50, -20, 0, 0),
-    #                     (1, np.inf, np.inf,    50, 20, 100, 10))
+    # ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
+    #                     (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
+    ksi_param_bounds = ((0, -np.inf, -np.inf, -50, -20, 0, 0),
+                        (1, np.inf, np.inf,    50, 20, 100, 10))
     vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds, method='trf')
     m, c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
