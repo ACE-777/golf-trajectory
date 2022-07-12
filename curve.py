@@ -94,8 +94,8 @@ def fit_2d(track, track_t, extrapolate_to=None):
     def eta_fixed(t, a, b):
         return eta(t, a, b, c_drag_z, zv0, z0)
 
-    eta_param_bounds = ((-np.inf, -np.inf),
-                        (np.inf, np.inf))
+    eta_param_bounds = ((-3000, 0),
+                        (0, 40))
     vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta, bounds=eta_param_bounds, method='trf')
     a, b = vals_eta
     print(vals_eta)
