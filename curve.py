@@ -84,8 +84,8 @@ def fit_2d(track, track_t, extrapolate_to=None):
     track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
 
-    ksi_param_bounds = ((-5, -10, -25, -25, 0, 0),
-                        (5,    0,  20,  20, 40, 10))
+    ksi_param_bounds = ((-1, -1, -25, -25, 20, 0),
+                        (1,    0,  20,  20, 40, 10))
     vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds, method='trf')
     c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
