@@ -21,8 +21,8 @@ x = horizontal_drag_coord
 z = horizontal_drag_coord
 def y(t, m, a, b, y0): return a * m * t**2 + b * t + y0
 
-def ksi(t, m, c_drag_x, c_drag_z, xv0, x0, zv0, z0): return focal * x(t, m, c_drag_x, xv0, x0) / z(t, m, c_drag_z, zv0, z0)
-def eta(t, m, a, b, y0, c_drag_z, zv0, z0): return focal * y(t, m, a, b, y0) / z(t, m, c_drag_z, zv0, z0)
+def ksi(t, m, c_drag_x, c_drag_z, xv0, x0, zv0, z0): return focal * x(t, m, c_drag_x, xv0, x0) / z(t, m, c_drag_z, zv0, z0) * pixel_to_meter
+def eta(t, m, a, b, y0, c_drag_z, zv0, z0): return focal * y(t, m, a, b, y0) / z(t, m, c_drag_z, zv0, z0) * pixel_to_meter
 
 
 def fit_3d():
@@ -79,8 +79,8 @@ def fit_2d():
 
     g = -9.8
     # ksi_param_bounds = ((0, 0.5, -30, -5, 50, 0), (1, 15, 30, 5, 80, 10))
-    ksi_param_bounds = ((0, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, 0),
-                        (0.5, np.inf, np.inf, np.inf, np.inf, np.inf, 10))
+    ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
+                        (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
     vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds)
     m, c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
@@ -117,5 +117,8 @@ def fit_2d():
 
 
 focal = 0.013
+pixel_to_meter = 1920 / 0.03
+# test_ksi = focal * 10 / 20 * pixel_to_meter
+# print(test_ksi)
 # fit_3d()
 fit_2d()
