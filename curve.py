@@ -67,14 +67,18 @@ def fit_3d():
     plt.show()
 
 
-def fit_2d(track, track_t):
+def fit_2d(track, track_t, extrapolate_to=None):
+    if extrapolate_to is None:
+        extrapolate_to = track_t[-1]*2
+    t = np.linspace(0, extrapolate_to, 20)
+
     track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
 
-    # ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
-    #                     (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
-    ksi_param_bounds = ((0, -np.inf, -np.inf, -50, -20, 0, 0),
-                        (1, np.inf, np.inf,    50, 20, 100, 10))
+    ksi_param_bounds = ((-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf),
+                        (np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf))
+    # ksi_param_bounds = ((0, -np.inf, -np.inf, -50, -20, 0, 0),
+    #                     (1, np.inf, np.inf,    50, 20, 100, 10))
     vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds, method='trf')
     m, c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
@@ -85,8 +89,6 @@ def fit_2d(track, track_t):
 
     vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta, method='trf')
     a, b, y0 = vals_eta
-
-    t = np.linspace(0, 4, 20)
 
     fig, axs = plt.subplots(3)
     fig.suptitle('3d and camera projection')

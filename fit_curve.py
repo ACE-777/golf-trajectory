@@ -31,8 +31,11 @@ track2_landing = np.array([
     [403.93, 474.01],
 ])
 
-first_points = np.append(np.arange(start=0, stop=len(track2_landing) - 1, step=1), [48])
-track2_landing_t = np.array(list(map(lambda i: i / 30, first_points)))
+track2_i = np.arange(start=0, stop=len(track2), step=1)
+track2_t = np.array(list(map(lambda i: i / 30, track2_i)))
 
-# fit_2d(track2_landing, track2_landing_t)
-fit_2d(track2_landing, track2_landing_t)
+track2_landing_i = np.append(np.arange(start=0, stop=len(track2_landing) - 1, step=1), [48])
+track2_landing_t = np.array(list(map(lambda i: i / 30, track2_landing_i)))
+
+fit_2d(track2_landing, track2_landing_t, 50/30)
+fit_2d(track2, track2_t)
