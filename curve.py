@@ -89,7 +89,7 @@ def fit_2d(track, track_t, extrapolate_to=None):
     vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds, method='trf')
     c_drag_x, c_drag_z, xv0, x0, zv0, z0 = vals_ksi
 
-    print('c_drag_x {}, c_drag_z {} xv0 {}, x0 {}, zv0 {}, z0 {}'.format(c_drag_x, c_drag_z, xv0, x0, zv0, z0))
+    print('c_drag_x {:.2f}, c_drag_z {:.4f} xv0 {:.2f}, x0 {:.2f}, zv0 {:.2f}, z0 {:.2f}'.format(c_drag_x, c_drag_z, xv0, x0, zv0, z0))
 
     def eta_fixed(t, a, b):
         return eta(t, a, b, c_drag_z, zv0, z0)
@@ -98,7 +98,7 @@ def fit_2d(track, track_t, extrapolate_to=None):
                         (-50, 40))
     vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta, bounds=eta_param_bounds, method='trf')
     a, b = vals_eta
-    print(vals_eta)
+    print('y_a {:.2f}, y_b {:.2f}'.format(a,b))
 
     fig, axs = plt.subplots(3)
     fig.suptitle('3d and camera projection')
