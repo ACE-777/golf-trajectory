@@ -1,5 +1,5 @@
 import numpy as np
-from linear_drag_model import fit_linear_drag
+from curve import fit_2d
 
 track = np.array([
     [323.80, 1093.22],
@@ -40,6 +40,6 @@ track2_t = np.array(list(map(lambda i: i / 30, track2_i)))
 track2_landing_i = np.append(np.arange(start=0, stop=len(track2_landing) - 1, step=1), [48])
 track2_landing_t = np.array(list(map(lambda i: i / 30, track2_landing_i)))
 
-fit_linear_drag(track, track1_t)
-fit_linear_drag(track2_landing, track2_landing_t, 50/30)
-fit_linear_drag(track2, track2_t)
+fit_2d(track, track1_t)
+fit_2d(track2_landing, track2_landing_t, 50/30)
+fit_2d(track2, track2_t)
