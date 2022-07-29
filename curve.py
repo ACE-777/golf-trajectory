@@ -130,7 +130,7 @@ def fit_2d(track, track_t, extrapolate_to=None):
     plt.show()
 
 
-def fit_quadratic_drag(track, extrapolate_to=None):
+def fit_quadratic_drag(track, target_times):
     time_track = np.array(track)
     track_t = time_track[:, 2]
 
@@ -153,10 +153,7 @@ def fit_quadratic_drag(track, extrapolate_to=None):
     a, b = vals_eta
     print('y_a {:.2f}, y_b {:.2f}'.format(a, b))
 
-    if extrapolate_to is None:
-        extrapolate_to = track_t[-1] * 3
-    t = np.linspace(0, extrapolate_to, 20)
-
+    t = np.array(target_times)
     xs = ksi(t, c_x, c_z, xv0, x0, zv0, z0)
     ys = eta(t, a, b, c_z, zv0, z0)
     xs = np.array(list(map(lambda v: v + 1080 / 2, xs)))
