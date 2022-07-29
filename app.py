@@ -17,7 +17,7 @@ def home():
         body = request.json
         logging.info(body)
         points = to_list(body['points'])
-        target_times = body['target_times']
+        target_times = body.get('target_times')
         logging.info('points: {}'.format(points))
         extrapolated = fit_quadratic_drag(points, target_times)
         return jsonify({'extrapolated': to_list(extrapolated)})

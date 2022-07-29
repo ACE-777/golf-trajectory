@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -130,7 +132,7 @@ def fit_2d(track, track_t, extrapolate_to=None):
     plt.show()
 
 
-def fit_quadratic_drag(track, target_times):
+def fit_quadratic_drag(track, target_times=None):
     time_track = np.array(track)
     track_t = time_track[:, 2]
 
@@ -152,6 +154,17 @@ def fit_quadratic_drag(track, target_times):
     vals_eta, _ = curve_fit(eta_fixed, track_t, track_eta, bounds=eta_param_bounds, method='trf')
     a, b = vals_eta
     print('y_a {:.2f}, y_b {:.2f}'.format(a, b))
+
+    if target_times is None:
+        start = track_t[0]
+        target_times = np.linspace(start,  start + 10, 100)
+        t = np.array(target_times)
+        ys = eta(t, a, b, c_z, zv0, z0)
+        max_y = np.argmax(ys)
+        end = start + (max_y - start) * 2
+        step = track_t[1] - start
+        frames = math.ceil((end - start) / step)
+        target_times = np.linspace(start, start + frames * step, frames)
 
     t = np.array(target_times)
     xs = ksi(t, c_x, c_z, xv0, x0, zv0, z0)
