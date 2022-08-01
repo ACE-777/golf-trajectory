@@ -18,9 +18,10 @@ def test_dataset(root):
         track = load_track(ann_path)
         track_times = np.arange(0, (len(track)) / 30, 1/30)
         try:
+            print("---- {} ----".format(task))
             result = fit_quadratic_drag(track[0:2], track_times)
             dists = scipy.spatial.distance.cdist(result[:, [0, 1]], track)
-            dist = sum(dists[:, 0]) / len(dists)
+            dist = sum(np.diagonal(dists)) / len(dists)
             total_dist += dist
             total_tasks += 1
             print(dist)
