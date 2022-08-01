@@ -137,7 +137,7 @@ def fit_quadratic_drag(track, target_times=None):
     if np.shape(time_track)[1] == 3:
         track_t = time_track[:, 2]
     else:
-        track_t = np.arange(0, (len(track) - 1) / 30, 0.03)
+        track_t = np.arange(0, (len(track)) / 30, 1/30)
 
     track_ksi = np.array(list(map(lambda v: v - 1080 / 2, time_track[:, 0])))
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, time_track[:, 1])))
