@@ -6,8 +6,10 @@ import matplotlib.pyplot as plt
 from curve import fit_quadratic_drag
 from cvat_annotations import load_track
 
+points = 3
 
-def test_dataset(root, visualize):
+
+def test_dataset(root, add_last=False, visualize=False):
     total_dist = 0
     total_tasks = 0
     for task in sorted(os.listdir(root)):
@@ -21,7 +23,13 @@ def test_dataset(root, visualize):
         track_times = np.arange(0, (len(track)) / 30, 1 / 30)
         try:
             print("---- {} ----".format(task))
-            result = fit_quadratic_drag(track[0:8], track_times)
+            source_points = np.stack(
+                (track[0:points - 1, 0], track[0:points - 1, 1], track_times[0:points - 1]),
+                axis=1
+            )
+            if add_last:
+                source_points = np.vstack((source_points, [track[-1, 0], track[-1, 1], track_times[-1]]))
+            result = fit_quadratic_drag(source_points, track_times)
             dists = scipy.spatial.distance.cdist(result[:, [0, 1]], track)
             dist = sum(np.diagonal(dists)) / len(dists)
             total_dist += dist
@@ -32,11 +40,10 @@ def test_dataset(root, visualize):
         except RuntimeError:
             print("Could not fit the curve for {}".format(task_path))
 
-    print("total distance: {}".format(total_dist / total_tasks))
+    return total_dist / total_tasks
 
 
 def plot(result, track):
-    track = np.array(track)
     fig, axs = plt.subplots(1)
     fig.suptitle('3d and camera projection')
 
@@ -49,4 +56,6 @@ def plot(result, track):
 
 
 if __name__ == '__main__':
-    test_dataset(sys.argv[1], False)
+    d1 = test_dataset(sys.argv[1], False, False)
+    d2 = test_dataset(sys.argv[1], True, False)
+    print("total distance: {}, with last point: {}".format(d1, d2))

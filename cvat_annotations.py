@@ -75,7 +75,7 @@ def load_track(annotation_path):
     del track[-last_occluded]
 
     print('Added empty rows for {} frames'.format(total_skipped))
-    return track
+    return np.array(track)
 
 
 def is_occluded(shape):
