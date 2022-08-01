@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from curve import fit_quadratic_drag
 from cvat_annotations import load_track
 
-points = 3
+points = 4
 
 
 def test_dataset(root, add_last=False, visualize=False):
@@ -28,7 +28,7 @@ def test_dataset(root, add_last=False, visualize=False):
                 axis=1
             )
             if add_last:
-                source_points = np.vstack((source_points, [track[-1, 0], track[-1, 1], track_times[-1]]))
+                source_points[-1] = [track[-1, 0], track[-1, 1], track_times[-1]]
             result = fit_quadratic_drag(source_points, track_times)
             dists = scipy.spatial.distance.cdist(result[:, [0, 1]], track)
             dist = sum(np.diagonal(dists)) / len(dists)
