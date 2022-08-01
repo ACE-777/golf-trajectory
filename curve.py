@@ -134,7 +134,10 @@ def fit_2d(track, track_t, extrapolate_to=None):
 
 def fit_quadratic_drag(track, target_times=None):
     time_track = np.array(track)
-    track_t = time_track[:, 2]
+    if np.shape(time_track)[1] == 3:
+        track_t = time_track[:, 2]
+    else:
+        track_t = np.arange(0, (len(track) - 1) / 30, 0.03)
 
     track_ksi = np.array(list(map(lambda v: v - 1080 / 2, time_track[:, 0])))
     track_eta = np.array(list(map(lambda v: 1920 / 2 - v, time_track[:, 1])))
@@ -164,7 +167,7 @@ def fit_quadratic_drag(track, target_times=None):
         end = start + (max_y - start) * 2
         step = track_t[1] - start
         frames = math.ceil((end - start) / step)
-        target_times = np.linspace(start, start + frames * step, frames)
+        target_times = np.arange(start, start + frames * step, step)
 
     t = np.array(target_times)
     xs = ksi(t, c_x, c_z, xv0, x0, zv0, z0)
