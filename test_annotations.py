@@ -7,11 +7,11 @@ from curve import fit_quadratic_drag
 from cvat_annotations import load_track
 
 
-def test_dataset(root):
+def test_dataset(root, visualize):
     total_dist = 0
     total_tasks = 0
     for task in sorted(os.listdir(root)):
-        if total_tasks > 3:
+        if visualize and total_tasks > 3:
             break
         task_path = os.path.join(root, task)
         if not os.path.isdir(task_path):
@@ -21,13 +21,14 @@ def test_dataset(root):
         track_times = np.arange(0, (len(track)) / 30, 1 / 30)
         try:
             print("---- {} ----".format(task))
-            result = fit_quadratic_drag(track[0:3], track_times)
+            result = fit_quadratic_drag(track[0:8], track_times)
             dists = scipy.spatial.distance.cdist(result[:, [0, 1]], track)
             dist = sum(np.diagonal(dists)) / len(dists)
             total_dist += dist
             total_tasks += 1
             print(dist)
-            plot(result, track)
+            if visualize:
+                plot(result, track)
         except RuntimeError:
             print("Could not fit the curve for {}".format(task_path))
 
@@ -36,7 +37,6 @@ def test_dataset(root):
 
 def plot(result, track):
     track = np.array(track)
-    track_times = np.arange(0, (len(track)) / 30, 1 / 30)
     fig, axs = plt.subplots(1)
     fig.suptitle('3d and camera projection')
 
@@ -49,4 +49,4 @@ def plot(result, track):
 
 
 if __name__ == '__main__':
-    test_dataset(sys.argv[1])
+    test_dataset(sys.argv[1], False)
