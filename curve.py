@@ -58,9 +58,6 @@ def fit_3d():
     vals_y, _ = curve_fit(y_fixed, data_t, data_y)
     a, b = vals_y
 
-    print(vals_z)
-    print(z(data_t, c_drag, zv0, z0))
-
     t = np.linspace(0, 2, 20)
 
     fig, axs = plt.subplots(3)
@@ -175,3 +172,7 @@ def fit_quadratic_drag(track, target_times=None):
     xs = np.array(list(map(lambda v: v + 1080 / 2, xs)))
     ys = np.array(list(map(lambda v: 1920 / 2 - v, ys)))
     return np.stack((xs, ys, t), axis=1)
+
+
+if __name__ == '__main__':
+    fit_3d()

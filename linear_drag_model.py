@@ -79,3 +79,43 @@ def fit_linear_drag(track, track_t, extrapolate_to=None):
     )
 
     plt.show()
+
+
+def fit_linear_drag_3d():
+    data_t = np.array([0, 0.3, 0.6, 0.9, 1.2])
+    data_z = np.array([0, 10, 15, 18, 19])
+    data_y = np.array([1, 5, 7, 7, 6])
+    vals_z, _ = curve_fit(z, data_t, data_z)
+    k, vz0, z0 = vals_z
+
+    def y_fixed(t, v0, y0):
+        return y(t, k, v0, y0)
+
+    vals_y, _ = curve_fit(y_fixed, data_t, data_y)
+    vy0, y0 = vals_y
+
+    t = np.linspace(0, 2, 20)
+
+    fig, axs = plt.subplots(3)
+    fig.suptitle('3d coordinates')
+
+    axs[0].set(xlabel='z', ylabel='y')
+    axs[0].plot(
+        data_z, data_y, '.',
+        z(t, k, vz0, z0), y(t, k, vy0, y0), '-'
+    )
+
+    axs[1].set(xlabel='t', ylabel='y')
+    axs[1].plot(
+        t,  y(t, k, vy0, y0), '-'
+    )
+
+    axs[2].set(xlabel='t', ylabel='z')
+    axs[2].plot(
+        t, z(t, k, vz0, z0), '-'
+    )
+    plt.show()
+
+
+if __name__ == '__main__':
+    fit_linear_drag_3d()
