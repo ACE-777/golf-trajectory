@@ -60,21 +60,20 @@ def load_track(annotation_path):
 
     track = []
     last_occluded = 0
+    frame_num = 0
     for r in df.iloc[:len(df['occluded']), :].values:
         occluded = int(r[5])
         if occluded == 1:
             last_occluded += 1
         else:
             last_occluded = 0
-        x = r[1]
-        y = r[2]
-        w = r[3] - x
-        h = r[4] - y
-        track.append([x + w / 2, y + h / 2])
-    print("removing occluded from the end: {}".format(last_occluded))
-    del track[-last_occluded]
-
-    print('Added empty rows for {} frames'.format(total_skipped))
+        if not occluded:
+            x = r[1]
+            y = r[2]
+            w = r[3] - x
+            h = r[4] - y
+            track.append([x + w / 2, y + h / 2, frame_num])
+        frame_num += 1
     return np.array(track)
 
 

@@ -130,17 +130,16 @@ def fit_2d(track, track_t, extrapolate_to=None):
 
 
 def fit_quadratic_drag(track, target_times=None):
-    time_track = np.array(track)
-    if np.shape(time_track)[1] == 3:
-        track_t = time_track[:, 2]
+    if np.shape(track)[1] == 3:
+        track_t = track[:, 2]
     else:
         track_t = np.arange(0, (len(track)) / 30, 1/30)
 
-    track_ksi = np.array(list(map(lambda v: v - 1080 / 2, time_track[:, 0])))
-    track_eta = np.array(list(map(lambda v: 1920 / 2 - v, time_track[:, 1])))
+    track_ksi = track[:, 0]
+    track_eta = track[:, 1]
 
-    ksi_param_bounds = ((-3, -0.001, -25, -25, 20, 1),
-                        (3, 0, 20, 20, 40, 10))
+    ksi_param_bounds = ((-3, -0.001, -55, -35, 20, 1),
+                        (3, 0,        50,  30, 40, 10))
     vals_ksi, _ = curve_fit(ksi, track_t, track_ksi, bounds=ksi_param_bounds, method='trf')
     c_x, c_z, xv0, x0, zv0, z0 = vals_ksi
 
@@ -169,9 +168,13 @@ def fit_quadratic_drag(track, target_times=None):
     t = np.array(target_times)
     xs = ksi(t, c_x, c_z, xv0, x0, zv0, z0)
     ys = eta(t, a, b, c_z, zv0, z0)
-    xs = np.array(list(map(lambda v: v + 1080 / 2, xs)))
-    ys = np.array(list(map(lambda v: 1920 / 2 - v, ys)))
     return np.stack((xs, ys, t), axis=1)
+
+
+def normalize_coordinates(track, im_size):
+    xs = np.array(list(map(lambda v: v - im_size[0] / 2, track[:, 0])))
+    ys = np.array(list(map(lambda v: im_size[1] / 2 - v, track[:, 1])))
+    return np.stack((xs, ys, track[:, 2]), axis=1)
 
 
 if __name__ == '__main__':
