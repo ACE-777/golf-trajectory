@@ -2,9 +2,9 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, minimize
 from curve import focal, pixel_to_meter, prepare_times
-
+from scipy.spatial.distance import cdist
 
 meter_to_feet = 3.28084
 
@@ -85,11 +85,11 @@ def fit_magnus(track, target_times):
     if np.shape(track)[1] == 3:
         track_t = track[:, 2]
     else:
-        track_t = np.arange(0, (len(track)) / 30, 1/30)
+        track_t = np.arange(0, (len(track)) / 30, 1 / 30)
 
-    bounds = ((-100, -100, -20, 50,  20,   1, 0),
-               (100,  100,  20, 200, 100, 10, 1))
-    vals_eta, _ = curve_fit(eta, track_t,  track[:, 1], method='trf', bounds=bounds)
+    bounds = ((-100, -100, -20, 50, 20, 1, 0),
+              (100, 100, 20, 200, 100, 10, 1))
+    vals_eta, _ = curve_fit(eta, track_t, track[:, 1], method='trf', bounds=bounds)
     w_i, w_k, v_x, v_y, v_z, z0, y0 = vals_eta
 
     for v in vals_eta:
@@ -98,9 +98,48 @@ def fit_magnus(track, target_times):
     def ksi_fixed(t, x0):
         return ksi(t, w_i, w_k, v_x, v_y, v_z, z0, x0)
 
-    vals_ksi, _ = curve_fit(ksi_fixed, track_t,  track[:, 0], method='trf')
+    vals_ksi, _ = curve_fit(ksi_fixed, track_t, track[:, 0], method='trf')
     x0 = vals_ksi[0]
     print('x0 {:.2f}'.format(x0))
+
+    def eta_by_t(t):
+        return eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
+
+    t = prepare_times(target_times, eta_by_t, target_times)
+    xs = ksi(t, w_i, w_k, v_x, v_y, v_z, z0, x0)
+    ys = eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
+    return np.stack((xs, ys, t), axis=1)
+
+
+def distance_magnus(params, track):
+    w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = params
+    # print(params)
+    t = track[:, 2]
+    coords = magnus_coord(t, w_i, w_k, v_x, v_y, v_z)
+    x = coords[4, :] + x0
+    y = coords[2, :] + y0
+    z = coords[0, :] + z0
+    # print("x: {} y: {} z: {}".format(x, y, z))
+    ksi = focal * x / z * pixel_to_meter * meter_to_feet
+    eta = focal * y / z * pixel_to_meter * meter_to_feet
+    points = np.stack((ksi, eta), axis=1)
+    dists = cdist(points, track[:, [0, 1]])
+    # print(dists)
+    dist = sum(np.diagonal(dists)) / len(dists)
+    # print("dist: {}".format(dist))
+    return dist
+
+
+def minimize_magnus(track, target_times):
+    bounds = ((-100, -100, -20, 10, 20, -5, 0, 0),
+              (100, 100, 20, 150, 200, 5, 1, 5))
+
+    result = minimize(distance_magnus, x0=(0, 0, 0, 50, 100, 0, 0, 1), args=track)
+    print(result)
+    w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = result.x
+
+    # for v in result:
+    #     print('v {:.2f}'.format(v))
 
     def eta_by_t(t):
         return eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)

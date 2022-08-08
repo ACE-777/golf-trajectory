@@ -8,7 +8,7 @@ from cvat_annotations import load_track
 import av
 
 from linear_drag_model import fit_linear_drag
-from magnus import fit_magnus
+from magnus import fit_magnus, minimize_magnus
 
 points = 5
 method = 'magnus'  # 'quadratic'
@@ -43,7 +43,7 @@ def test_dataset(root, add_last=False, visualize=False):
             elif method == 'linear':
                 result = fit_linear_drag(source_points, track_times)
             elif method == 'magnus':
-                result = fit_magnus(source_points, track_times)
+                result = minimize_magnus(source_points, track_times)
             else:
                 print('Unexpected method')
                 return total_dist / total_tasks
