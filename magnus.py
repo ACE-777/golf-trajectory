@@ -32,10 +32,10 @@ def magnus_derivatives(t, x):
     return x_prime
 
 
-def visualize_magnus():
-    t_span = (0, 8.3)
+def visualize_magnus(t_eval):
+    t_span = (t_eval[0], t_eval[-1])
     y0 = [0, 175, 0, 75, 0, 0]
-    results = solve_ivp(magnus_derivatives, t_span, y0)
+    results = solve_ivp(magnus_derivatives, t_span, y0, t_eval=t_eval)
     y = results.y
 
     fig = plt.figure()
@@ -51,4 +51,5 @@ def visualize_magnus():
 
 
 if __name__ == '__main__':
-    visualize_magnus()
+    times = np.linspace(0, 10, 20)
+    visualize_magnus(times)
