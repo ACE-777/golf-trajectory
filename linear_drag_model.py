@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from math import exp, log, cosh, sqrt
 
+from curve import prepare_times
+
 focal = 0.013
 pixel_to_meter = 1920 / 0.03
 
@@ -35,13 +37,14 @@ def ksi(t, k, xv0, x0, vz0): return focal * x(t, k, xv0, x0) / z(t, k, vz0, z0) 
 def eta(t, k, vy0, vz0, y0): return focal * y(t, k, vy0, y0) / z(t, k, vz0, z0) * pixel_to_meter
 
 
-def fit_linear_drag(track, track_t, extrapolate_to=None):
-    if extrapolate_to is None:
-        extrapolate_to = track_t[-1] * 3
-    t = np.linspace(0, extrapolate_to, 20)
+def fit_linear_drag(track, target_times):
+    if np.shape(track)[1] == 3:
+        track_t = track[:, 2]
+    else:
+        track_t = np.arange(0, (len(track)) / 30, 1/30)
 
-    track_ksi = np.array(list(map(lambda v: v - 1080 / 2, track[:, 0])))
-    track_eta = np.array(list(map(lambda v: 1920 / 2 - v, track[:, 1])))
+    track_ksi = track[:, 0]
+    track_eta = track[:, 1]
 
     bounds = ((-10, 0, 1, -20),
               (1, 200, 100, 20))
@@ -59,26 +62,13 @@ def fit_linear_drag(track, track_t, extrapolate_to=None):
     xv0, x0 = vals_ksi
     print('xv0 {:.2f}, x0 {:.2f}'.format(xv0, x0))
 
-    fig, axs = plt.subplots(3)
-    fig.suptitle('3d and camera projection')
+    def eta_by_t(t):
+        return eta(t, k, vy0, vz0, y0)
 
-    axs[0].set(xlabel='ksi', ylabel='eta')
-    axs[0].plot(
-        track_ksi, track_eta, '.',
-        ksi(t, k, xv0, x0, vz0), eta(t, k, vy0, vz0, y0), '-'
-    )
-
-    axs[1].set(xlabel='t', ylabel='y')
-    axs[1].plot(
-        t, y(t, k, vy0, y0), '-'
-    )
-
-    axs[2].set(xlabel='t', ylabel='z')
-    axs[2].plot(
-        t, z(t, k, vz0, z0), '-'
-    )
-
-    plt.show()
+    t = prepare_times(target_times, eta_by_t, target_times)
+    xs = ksi(t, k, xv0, x0, vz0)
+    ys = eta(t, k, vy0, vz0, y0)
+    return np.stack((xs, ys, t), axis=1)
 
 
 def fit_linear_drag_3d():

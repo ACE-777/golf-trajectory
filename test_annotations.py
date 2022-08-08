@@ -7,7 +7,10 @@ from curve import fit_quadratic_drag, normalize_coordinates
 from cvat_annotations import load_track
 import av
 
+from linear_drag_model import fit_linear_drag
+
 points = 7
+method = 'linear'  # 'quadratic'
 
 
 def test_dataset(root, add_last=False, visualize=False):
@@ -32,7 +35,10 @@ def test_dataset(root, add_last=False, visualize=False):
             )
             if add_last:
                 source_points[-1] = [track[-1, 0], track[-1, 1], track_times[-1]]
-            result = fit_quadratic_drag(source_points, track_times)
+            if method == 'quadratic':
+                result = fit_quadratic_drag(source_points, track_times)
+            else:
+                result = fit_linear_drag(source_points, track_times)
             dists = scipy.spatial.distance.cdist(result[:, [0, 1]], track[:, [0, 1]])
             dist = sum(np.diagonal(dists)) / len(dists)
             total_dist += dist

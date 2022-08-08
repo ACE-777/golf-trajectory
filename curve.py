@@ -154,21 +154,33 @@ def fit_quadratic_drag(track, target_times=None):
     a, b = vals_eta
     print('y_a {:.2f}, y_b {:.2f}'.format(a, b))
 
+    def eta_by_t(t):
+        return eta(t, a, b, c_z, zv0, z0)
+
+    t = prepare_times(target_times, eta_by_t, target_times)
+    xs = ksi(t, c_x, c_z, xv0, x0, zv0, z0)
+    ys = eta(t, a, b, c_z, zv0, z0)
+    return np.stack((xs, ys, t), axis=1)
+
+
+def prepare_times(track_t, eta_by_t, target_times=None):
     if target_times is None:
         start = track_t[0]
-        target_times = np.linspace(start,  start + 10, 100)
-        t = np.array(target_times)
-        ys = eta(t, a, b, c_z, zv0, z0)
-        max_y = np.argmax(ys)
-        end = start + (max_y - start) * 2
+        end = find_end_by_y(track_t, eta_by_t)
         step = track_t[1] - start
         frames = math.ceil((end - start) / step)
         target_times = np.arange(start, start + frames * step, step)
 
+    return np.array(target_times)
+
+
+def find_end_by_y(track_t, eta_by_t):
+    start = track_t[0]
+    target_times = np.linspace(start,  start + 10, 100)
     t = np.array(target_times)
-    xs = ksi(t, c_x, c_z, xv0, x0, zv0, z0)
-    ys = eta(t, a, b, c_z, zv0, z0)
-    return np.stack((xs, ys, t), axis=1)
+    ys = eta_by_t(t)
+    max_y = np.argmax(ys)
+    return start + (max_y - start) * 2
 
 
 def normalize_coordinates(track, im_size):
