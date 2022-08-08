@@ -113,33 +113,24 @@ def fit_magnus(track, target_times):
 
 def distance_magnus(params, track):
     w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = params
-    # print(params)
     t = track[:, 2]
     coords = magnus_coord(t, w_i, w_k, v_x, v_y, v_z)
     x = coords[4, :] + x0
     y = coords[2, :] + y0
     z = coords[0, :] + z0
-    # print("x: {} y: {} z: {}".format(x, y, z))
     ksi = focal * x / z * pixel_to_meter * meter_to_feet
     eta = focal * y / z * pixel_to_meter * meter_to_feet
     points = np.stack((ksi, eta), axis=1)
     dists = cdist(points, track[:, [0, 1]])
-    # print(dists)
-    dist = sum(np.diagonal(dists)) / len(dists)
-    # print("dist: {}".format(dist))
-    return dist
+    return sum(np.diagonal(dists)) / len(dists)
 
 
 def minimize_magnus(track, target_times):
-    bounds = ((-100, -100, -20, 10, 20, -5, 0, 0),
-              (100, 100, 20, 150, 200, 5, 1, 5))
+    bounds = ((-100, 100), (-100, 100), (50, 300), (1, 100), (-20, 20), (-1, 1), (0, 1), (3, 10))
 
-    result = minimize(distance_magnus, x0=(0, 0, 0, 50, 100, 0, 0, 1), args=track)
+    result = minimize(distance_magnus, x0=(0, 0, 0, 50, 100, 0, 0, 1), args=track, bounds=bounds)
     print(result)
     w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = result.x
-
-    # for v in result:
-    #     print('v {:.2f}'.format(v))
 
     def eta_by_t(t):
         return eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
