@@ -39,20 +39,21 @@ def test_dataset(root, add_last=False, visualize=False):
             total_tasks += 1
             print(dist)
             if visualize:
-                plot(result, track[:, [0, 1]])
+                plot(result, track[:, [0, 1]], source_points)
         except RuntimeError:
             print("Could not fit the curve for {}".format(task_path))
 
     return total_dist / total_tasks
 
 
-def plot(result, track):
+def plot(result, track, source_points):
     fig, axs = plt.subplots(1)
     fig.suptitle('3d and camera projection')
 
     axs.set(xlabel='ksi', ylabel='eta')
     axs.plot(
         track[:, 0], track[:, 1], '.',
+        source_points[:, 0], source_points[:, 1], '*',
         result[:, 0], result[:, 1], '-'
     )
     plt.show()
