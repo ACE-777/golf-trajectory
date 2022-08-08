@@ -126,10 +126,10 @@ def distance_magnus(params, track):
 
 
 def minimize_magnus(track, target_times):
-    bounds = ((-200, 200), (-300, 300), (50, 300), (1, 100), (-50, 50), (-1, 1), (0, 1), (3, 10))
+    bounds = ((-200, 200), (-300, 300), (20, 300), (1, 100), (-50, 50), (-1, 1), (0, 1), (3, 10))
 
     result = minimize(distance_magnus, x0=(0, 100, 100, 50, 0, 0, 0, 1), args=track, bounds=bounds)
-    print(result)
+    # print(result)
     w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = result.x
 
     def eta_by_t(t):
@@ -138,6 +138,10 @@ def minimize_magnus(track, target_times):
     t = prepare_times(target_times, eta_by_t, target_times)
     xs = ksi(t, w_i, w_k, v_x, v_y, v_z, z0, x0)
     ys = eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
+    if len(t) > len(xs):
+        print("t {} xs {} ys{}".format(t.shape, xs.shape, ys.shape))
+        print("Weirdly less coordinates than times")
+        t = t[0:len(xs)]
     return np.stack((xs, ys, t), axis=1)
 
 
