@@ -46,9 +46,9 @@ def fit_linear_drag(track, target_times):
     track_ksi = track[:, 0]
     track_eta = track[:, 1]
 
-    bounds = ((-10, 0, 1, -20),
-              (1, 200, 100, 20))
-    vals_eta, _ = curve_fit(eta, track_t, track_ksi, bounds=bounds)
+    bounds = ((-3, 1, 1, -10),
+              (5, 10, 100, 10))
+    vals_eta, _ = curve_fit(eta, track_t, track_eta, bounds=bounds)
     k, vy0, vz0, y0 = vals_eta
 
     print('k {:.2f}, vy0 {:.2f}, vz0 {:.2f}, y0 {:.2f}'.format(k, vy0, vz0, y0))
@@ -58,7 +58,7 @@ def fit_linear_drag(track, target_times):
 
     bounds = ((-20, -2),
               (20, 2))
-    vals_ksi, _ = curve_fit(ksi_fixed, track_t, track_eta, bounds=bounds)
+    vals_ksi, _ = curve_fit(ksi_fixed, track_t, track_ksi, bounds=bounds)
     xv0, x0 = vals_ksi
     print('xv0 {:.2f}, x0 {:.2f}'.format(xv0, x0))
 
