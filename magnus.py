@@ -10,7 +10,7 @@ meter_to_feet = 3.28084
 
 
 # https://www.math.union.edu/~wangj/courses/previous/math238w13/Golf%20Ball%20Flight%20Dynamics2.pdf
-def magnus_derivatives(t, x, w_i, w_j, w_k):
+def magnus_derivatives(t, x, w_i, w_k):
     c_d = .15
     r = .002378
     a = 0.25 * math.pi * (1.75 / 12) * (1.75 / 12)
@@ -20,6 +20,7 @@ def magnus_derivatives(t, x, w_i, w_j, w_k):
     s = .000005
     m = (1.5 / (16 * 32.2))
     magnus = (s / m)
+    w_j = 0
 
     x_prime = np.zeros(6)
     # X
@@ -35,7 +36,7 @@ def magnus_derivatives(t, x, w_i, w_j, w_k):
 
 
 def magnus_derivatives_fixed_spin(t, x):
-    return magnus_derivatives(t, x, -100, 0, 100)
+    return magnus_derivatives(t, x, -100, 100)
 
 
 def visualize_magnus(t_eval):
@@ -56,27 +57,27 @@ def visualize_magnus(t_eval):
     plt.show()
 
 
-def magnus_coord(t, w_i, w_j, w_k, v_x, v_y, v_z):
+def magnus_coord(t, w_i, w_k, v_x, v_y, v_z):
     t_span = (t[0], t[-1])
     y0 = [0, v_x, 0, v_y, 0, v_z]
 
     def derivatives(t, x):
-        return magnus_derivatives(t, x, w_i, w_j, w_k)
+        return magnus_derivatives(t, x, w_i, w_k)
 
     return solve_ivp(derivatives, t_span, y0, t_eval=t).y
 
 
-def ksi(t, w_i, w_j, w_k, v_x, v_y, v_z, z0, x0):
-    coords = magnus_coord(t, w_i, w_j, w_k, v_x, v_y, v_z)
-    x = coords[0, :] + x0
-    z = coords[2, :] + z0
+def ksi(t, w_i, w_k, v_x, v_y, v_z, z0, x0):
+    coords = magnus_coord(t, w_i, w_k, v_x, v_y, v_z)
+    x = coords[4, :] + x0
+    z = coords[0, :] + z0
     return focal * x / z * pixel_to_meter * meter_to_feet
 
 
-def eta(t, w_i, w_j, w_k, v_x, v_y, v_z, z0, y0):
-    coords = magnus_coord(t, w_i, w_j, w_k, v_x, v_y, v_z)
-    y = coords[4, :] + y0
-    z = coords[2, :] + z0
+def eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0):
+    coords = magnus_coord(t, w_i, w_k, v_x, v_y, v_z)
+    y = coords[2, :] + y0
+    z = coords[0, :] + z0
     return focal * y / z * pixel_to_meter * meter_to_feet
 
 
@@ -86,25 +87,27 @@ def fit_magnus(track, target_times):
     else:
         track_t = np.arange(0, (len(track)) / 30, 1/30)
 
-    vals_eta, _ = curve_fit(eta, track_t,  track[:, 1], method='trf')
-    w_i, w_j, w_k, v_x, v_y, v_z, z0, y0 = vals_eta
+    bounds = ((-100, -100, -20, 50,  20,   1, 0),
+               (100,  100,  20, 200, 100, 10, 1))
+    vals_eta, _ = curve_fit(eta, track_t,  track[:, 1], method='trf', bounds=bounds)
+    w_i, w_k, v_x, v_y, v_z, z0, y0 = vals_eta
 
     for v in vals_eta:
         print('v {:.2f}'.format(v))
 
     def ksi_fixed(t, x0):
-        return ksi(t, w_i, w_j, w_k, v_x, v_y, v_z, z0, x0)
+        return ksi(t, w_i, w_k, v_x, v_y, v_z, z0, x0)
 
-    vals_ksi, _ = curve_fit(ksi_fixed, track_t,  -track[:, 0], method='trf')
+    vals_ksi, _ = curve_fit(ksi_fixed, track_t,  track[:, 0], method='trf')
     x0 = vals_ksi[0]
     print('x0 {:.2f}'.format(x0))
 
     def eta_by_t(t):
-        return eta(t, w_i, w_j, w_k, v_x, v_y, v_z, z0, y0)
+        return eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
 
     t = prepare_times(target_times, eta_by_t, target_times)
-    xs = ksi(t, w_i, w_j, w_k, v_x, v_y, v_z, z0, x0)
-    ys = eta(t, w_i, w_j, w_k, v_x, v_y, v_z, z0, y0)
+    xs = ksi(t, w_i, w_k, v_x, v_y, v_z, z0, x0)
+    ys = eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
     return np.stack((xs, ys, t), axis=1)
 
 
