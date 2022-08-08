@@ -9,7 +9,7 @@ import av
 
 from linear_drag_model import fit_linear_drag
 
-points = 7
+points = 5
 method = 'linear'  # 'quadratic'
 
 
