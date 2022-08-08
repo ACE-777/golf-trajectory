@@ -17,18 +17,20 @@ def test_dataset(root, add_last=False, visualize=False):
     total_dist = 0
     total_tasks = 0
     for task in sorted(os.listdir(root)):
-        if visualize and total_tasks > 5:
+        # if not task == 'task_1_1':
+        #     continue
+        if visualize and total_tasks > 15:
             break
         task_path = os.path.join(root, task)
         if not os.path.isdir(task_path):
             continue
+        print("---- {} ----".format(task))
         im_size = get_image_size(task_path)
         ann_path = os.path.join(task_path, 'annotations.json')
         track = load_track(ann_path)
         track = normalize_coordinates(track, im_size)
         track_times = track[:, 2] / 30
         try:
-            print("---- {} ----".format(task))
             source_points = np.stack(
                 (track[0:points - 1, 0], track[0:points - 1, 1], track_times[0:points - 1]),
                 axis=1
