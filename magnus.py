@@ -126,9 +126,9 @@ def distance_magnus(params, track):
 
 
 def minimize_magnus(track, target_times):
-    bounds = ((-100, 100), (-100, 100), (50, 300), (1, 100), (-20, 20), (-1, 1), (0, 1), (3, 10))
+    bounds = ((-200, 200), (-300, 300), (50, 300), (1, 100), (-50, 50), (-1, 1), (0, 1), (3, 10))
 
-    result = minimize(distance_magnus, x0=(0, 0, 0, 50, 100, 0, 0, 1), args=track, bounds=bounds)
+    result = minimize(distance_magnus, x0=(0, 100, 100, 50, 0, 0, 0, 1), args=track, bounds=bounds)
     print(result)
     w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = result.x
 

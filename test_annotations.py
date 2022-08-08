@@ -10,7 +10,7 @@ import av
 from linear_drag_model import fit_linear_drag
 from magnus import fit_magnus, minimize_magnus
 
-points = 5
+points = 7
 method = 'magnus'  # 'quadratic'
 
 
