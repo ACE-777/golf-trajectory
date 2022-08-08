@@ -186,6 +186,8 @@ def find_end_by_y(track_t, eta_by_t):
 def normalize_coordinates(track, im_size):
     xs = np.array(list(map(lambda v: v - im_size[0] / 2, track[:, 0])))
     ys = np.array(list(map(lambda v: im_size[1] / 2 - v, track[:, 1])))
+    xs = xs - xs[0]
+    ys = ys - ys[0]
     return np.stack((xs, ys, track[:, 2]), axis=1)
 
 

@@ -8,9 +8,10 @@ from cvat_annotations import load_track
 import av
 
 from linear_drag_model import fit_linear_drag
+from magnus import fit_magnus
 
 points = 5
-method = 'linear'  # 'quadratic'
+method = 'magnus'  # 'quadratic'
 
 
 def test_dataset(root, add_last=False, visualize=False):
@@ -19,7 +20,7 @@ def test_dataset(root, add_last=False, visualize=False):
     for task in sorted(os.listdir(root)):
         # if not task == 'task_1_1':
         #     continue
-        if visualize and total_tasks > 15:
+        if visualize and total_tasks > 5:
             break
         task_path = os.path.join(root, task)
         if not os.path.isdir(task_path):
@@ -39,8 +40,13 @@ def test_dataset(root, add_last=False, visualize=False):
                 source_points[-1] = [track[-1, 0], track[-1, 1], track_times[-1]]
             if method == 'quadratic':
                 result = fit_quadratic_drag(source_points, track_times)
-            else:
+            elif method == 'linear':
                 result = fit_linear_drag(source_points, track_times)
+            elif method == 'magnus':
+                result = fit_magnus(source_points, track_times)
+            else:
+                print('Unexpected method')
+                return total_dist / total_tasks
             dists = scipy.spatial.distance.cdist(result[:, [0, 1]], track[:, [0, 1]])
             dist = sum(np.diagonal(dists)) / len(dists)
             total_dist += dist
