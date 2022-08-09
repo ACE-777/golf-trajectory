@@ -13,7 +13,7 @@ import time
 from linear_drag_model import fit_linear_drag
 from magnus import minimize_magnus
 
-white_list = ['task_21']
+white_list = []
 skip_list = ['task_34']
 points = 7
 method = 'magnus'  # quadratic magnus
