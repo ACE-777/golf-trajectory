@@ -136,6 +136,7 @@ def find_video(path):
 video_extensions = ['mov', 'mp4']
 
 if __name__ == '__main__':
-    d1 = test_dataset(sys.argv[1], FittingMode.ApexPoint, False)
-    d2 = test_dataset(sys.argv[1], FittingMode.ApexAndLast, False)
-    print("total distance: {}, with last point: {}".format(d1, d2))
+    d1 = test_dataset(sys.argv[1], FittingMode.Normal, False)
+    d2 = test_dataset(sys.argv[1], FittingMode.LastPoint, False)
+    d3 = test_dataset(sys.argv[1], FittingMode.ApexAndLast, False)
+    print("total distance: {}, with last point: {} with apex and last {}".format(d1, d2, d3))
