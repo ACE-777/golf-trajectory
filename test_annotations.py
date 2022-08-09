@@ -1,5 +1,4 @@
 from enum import Enum
-
 import numpy as np
 import sys
 import os
@@ -14,7 +13,7 @@ import time
 from linear_drag_model import fit_linear_drag
 from magnus import fit_magnus, minimize_magnus
 
-points = 8
+points = 7
 method = 'magnus'  # quadratic magnus
 
 
@@ -31,7 +30,7 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
     for task in sorted(os.listdir(root)):
         # if not task == 'task_1_1':
         #     continue
-        if visualize and total_tasks > 3:
+        if visualize and total_tasks > 5:
             break
         task_path = os.path.join(root, task)
         if not os.path.isdir(task_path):
@@ -48,16 +47,18 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
                 axis=1
             )
             apex_index = find_apex_index(track)
+            last_point = [track[-1, 0], track[-1, 1], track_times[-1]]
             if (mode == FittingMode.ApexPoint or mode == FittingMode.ApexAndLast) and apex_index >= points:
-                source_points[-1] = track[apex_index, :]
+                apex_point = [track[apex_index, 0], track[apex_index, 1], track_times[apex_index]]
+                source_points[-1] = apex_point
             if mode == FittingMode.LastPoint:
-                source_points[-1] = track[-1, :]
+                source_points[-1] = last_point
             if mode == FittingMode.ApexAndLast and source_points[-1, 2] < track[-1, 2]:
-                source_points = np.append(source_points, [track[-1, :]], axis=0)
+                source_points = np.append(source_points, last_point)
 
             if len(source_points) < points - 1:
                 print("Bad source points: {}".format(source_points))
-                continue
+                # continue
 
             start = time.time()
             if method == 'quadratic':
