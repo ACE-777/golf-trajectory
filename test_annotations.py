@@ -1,4 +1,6 @@
 from enum import Enum
+from statistics import mean
+
 import numpy as np
 import sys
 import os
@@ -15,7 +17,7 @@ from magnus import minimize_magnus
 
 white_list = []
 skip_list = ['task_34']
-points = 7
+points = 10
 method = 'magnus'  # quadratic magnus
 
 
@@ -27,7 +29,7 @@ class FittingMode(Enum):
 
 
 def test_dataset(root, mode=FittingMode.Normal, visualize=False):
-    total_dist = 0
+    total_dists = []
     total_tasks = 0
     for task in sorted(os.listdir(root)):
         if len(white_list) > 0 and task not in white_list:
@@ -73,12 +75,12 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
                 result = minimize_magnus(source_points, track_times)
             else:
                 print('Unexpected method')
-                return total_dist / total_tasks
+                return mean(total_dists)
             print("time: {}".format(time.time() - start))
 
             dists = scipy.spatial.distance.cdist(result[:, [0, 1]], track[:, [0, 1]])
             dist = sum(np.diagonal(dists)) / len(dists)
-            total_dist += dist
+            total_dists.append(dist)
             total_tasks += 1
             print(dist)
             if visualize:
@@ -86,7 +88,7 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
         except RuntimeError:
             print("Could not fit the curve for {}".format(task_path))
 
-    return total_dist / total_tasks
+    return mean(total_dists)
 
 
 def plot(result, track, source_points):
@@ -139,4 +141,4 @@ if __name__ == '__main__':
     d1 = test_dataset(sys.argv[1], FittingMode.Normal, False)
     d2 = test_dataset(sys.argv[1], FittingMode.LastPoint, False)
     d3 = test_dataset(sys.argv[1], FittingMode.ApexAndLast, False)
-    print("total distance: {}, with last point: {} with apex and last {}".format(d1, d2, d3))
+    print("total distance: {}, with last point: {} with apex and last {}".format(round(d1), round(d2), round(d3)))

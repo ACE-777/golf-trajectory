@@ -124,16 +124,17 @@ def distance_magnus(params, track):
     dists = cdist(points, track[:, [0, 1]])
     diag = np.diagonal(dists)
     diag.setflags(write=1)
-    diag[-1] *= 2
-    diag[-2] *= 1.5
-    diag[0] *= 2
+    diag[-1] *= 4
+    diag[-2] *= 4
+    diag[0] *= 4
+    diag[1] *= 3
     return sum(diag) / len(dists)
 
 
 def minimize_magnus(track, target_times):
-    bounds = ((-200, 200), (-300, 300), (20, 300), (1, 100), (-50, 50), (-1, 1), (0, 1), (3, 10))
+    bounds = ((-200, 200), (-200, 200), (20, 300), (1, 100), (-50, 50), (-1, 1), (0, 1), (2, 10))
 
-    result = minimize(distance_magnus, x0=(0, 100, 100, 50, 0, 0, 0, 1), args=track, bounds=bounds)
+    result = minimize(distance_magnus, x0=(100, 100, 50, 30, 0, 0, 0, 5), args=track, bounds=bounds)
     # print(result)
     w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = result.x
 
