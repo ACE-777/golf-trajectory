@@ -53,8 +53,8 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
                 source_points[-1] = apex_point
             if mode == FittingMode.LastPoint:
                 source_points[-1] = last_point
-            if mode == FittingMode.ApexAndLast and source_points[-1, 2] < track[-1, 2]:
-                source_points = np.append(source_points, last_point)
+            if mode == FittingMode.ApexAndLast and source_points[-1, 2] < track_times[-1]:
+                source_points = np.append(source_points, [last_point], axis=0)
 
             if len(source_points) < points - 1:
                 print("Bad source points: {}".format(source_points))
