@@ -122,7 +122,11 @@ def distance_magnus(params, track):
     eta = focal * y / z * pixel_to_meter * meter_to_feet
     points = np.stack((ksi, eta), axis=1)
     dists = cdist(points, track[:, [0, 1]])
-    return sum(np.diagonal(dists)) / len(dists)
+    diag_dists = np.diagonal(dists)
+    # diag_dists.setflags(write=1)
+    # diag_dists[0] *= 2
+    # diag_dists[-1] *= 2
+    return sum(diag_dists) / len(dists)
 
 
 def minimize_magnus(track, target_times):
