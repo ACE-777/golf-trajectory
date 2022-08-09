@@ -11,8 +11,10 @@ import time
 
 
 from linear_drag_model import fit_linear_drag
-from magnus import fit_magnus, minimize_magnus
+from magnus import minimize_magnus
 
+white_list = ['task_21']
+skip_list = ['task_34']
 points = 7
 method = 'magnus'  # quadratic magnus
 
@@ -28,8 +30,10 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
     total_dist = 0
     total_tasks = 0
     for task in sorted(os.listdir(root)):
-        # if not task == 'task_1_1':
-        #     continue
+        if len(white_list) > 0 and task not in white_list:
+            continue
+        if task in skip_list:
+            continue
         if visualize and total_tasks > 5:
             break
         task_path = os.path.join(root, task)
