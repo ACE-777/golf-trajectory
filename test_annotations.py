@@ -29,6 +29,7 @@ class FittingMode(Enum):
 
 
 def test_dataset(root, mode=FittingMode.Normal, visualize=False, algorithm='Newton-CG', max_tasks=100):
+    print('Starting test mode: {} algorithm: {} max_tasks: {}'.format(mode, algorithm, max_tasks))
     total_dists = []
     total_tasks = 0
     for task in sorted(os.listdir(root)):
