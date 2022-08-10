@@ -131,10 +131,10 @@ def distance_magnus(params, track):
     return sum(diag) / len(dists)
 
 
-def minimize_magnus(track, target_times):
+def minimize_magnus(track, target_times, method='Newton-CG'):
     bounds = ((-200, 200), (-200, 200), (20, 300), (1, 100), (-50, 50), (-1, 1), (0, 1), (2, 10))
 
-    result = minimize(distance_magnus, x0=(100, 100, 50, 30, 0, 0, 0, 5), args=track, bounds=bounds)
+    result = minimize(distance_magnus, x0=(100, 100, 50, 30, 0, 0, 0, 5), args=track, bounds=bounds, method=method)
     # print(result)
     w_i, w_k, v_x, v_y, v_z, x0, y0, z0 = result.x
 

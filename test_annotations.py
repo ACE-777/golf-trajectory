@@ -28,7 +28,7 @@ class FittingMode(Enum):
     ApexAndLast = 4
 
 
-def test_dataset(root, mode=FittingMode.Normal, visualize=False):
+def test_dataset(root, mode=FittingMode.Normal, visualize=False, algorithm='Newton-CG', max_tasks=100):
     total_dists = []
     total_tasks = 0
     for task in sorted(os.listdir(root)):
@@ -36,7 +36,7 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
             continue
         if task in skip_list:
             continue
-        if visualize and total_tasks > 5:
+        if total_tasks > max_tasks:
             break
         task_path = os.path.join(root, task)
         if not os.path.isdir(task_path):
@@ -72,9 +72,9 @@ def test_dataset(root, mode=FittingMode.Normal, visualize=False):
             elif method == 'linear':
                 result = fit_linear_drag(source_points, track_times)
             elif method == 'magnus':
-                result = minimize_magnus(source_points, track_times)
+                result = minimize_magnus(source_points, track_times, algorithm)
             else:
-                print('Unexpected method')
+                print('Unexpected method {}'.format(method))
                 return mean(total_dists)
             print("time: {}".format(time.time() - start))
 
@@ -138,7 +138,21 @@ def find_video(path):
 video_extensions = ['mov', 'mp4']
 
 if __name__ == '__main__':
-    d1 = test_dataset(sys.argv[1], FittingMode.Normal, False)
-    d2 = test_dataset(sys.argv[1], FittingMode.LastPoint, False)
-    d3 = test_dataset(sys.argv[1], FittingMode.ApexAndLast, False)
-    print("total distance: {}, with last point: {} with apex and last {}".format(round(d1), round(d2), round(d3)))
+    test_mode = 'points'
+    if len(sys.argv) > 2:
+        test_mode = sys.argv[2]
+
+    if test_mode == 'points':
+        d1 = test_dataset(sys.argv[1], FittingMode.Normal)
+        d2 = test_dataset(sys.argv[1], FittingMode.LastPoint)
+        d3 = test_dataset(sys.argv[1], FittingMode.ApexAndLast)
+        print("total distance: {}, with last point: {} with apex and last {}".format(round(d1), round(d2), round(d3)))
+    elif sys.argv[2] == 'methods':
+        algorithms = ['Nelder-Mead', 'L-BFGS-B', 'Powell', 'TNC', 'SLSQP']
+        # 'CG', 'BFGS', 'Newton-CG', 'COBYLA', 'trust-constr', 'dogleg'
+        # 'trust-ncg', 'trust-exact', 'trust-krylov'
+        results = {}
+        for alg in algorithms:
+            results[alg] = test_dataset(sys.argv[1], FittingMode.ApexAndLast, False, alg)
+            print('{}: {}'.format(alg, results[alg]))
+        print(results)
