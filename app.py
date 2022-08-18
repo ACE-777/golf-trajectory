@@ -1,9 +1,10 @@
 import logging
 from flask import Flask, jsonify, request
 import os
-import numpy
+import numpy as np
 
 from curve import fit_quadratic_drag
+from magnus import fit_magnus
 
 app = Flask(__name__)
 
@@ -16,14 +17,15 @@ def home():
     if request.method == 'POST':
         body = request.json
         logging.info(body)
-        points = to_list(body['points'])
+        points = np.array(body['points'])
         target_times = body.get('target_times')
         logging.info('points: {}'.format(points))
-        extrapolated = fit_quadratic_drag(points, target_times)
+        extrapolated = fit_magnus(points, target_times)
+        extrapolated[:, (0, 1)] = np.round(extrapolated[:, (0, 1)], 1)
         return jsonify({'extrapolated': to_list(extrapolated)})
 
 
 def to_list(bbox):
-    if isinstance(bbox, numpy.ndarray):
+    if isinstance(bbox, np.ndarray):
         return bbox.tolist()
     return bbox

@@ -85,7 +85,7 @@ def fit_magnus(track, target_times):
     if np.shape(track)[1] == 3:
         track_t = track[:, 2]
     else:
-        track_t = np.arange(0, (len(track)) / 30, 1 / 30)
+        track_t = np.arange(0, len(track) / 30, 1 / 30)
 
     bounds = ((-100, -100, -20, 50, 20, 1, 0),
               (100, 100, 20, 200, 100, 10, 1))
@@ -105,9 +105,10 @@ def fit_magnus(track, target_times):
     def eta_by_t(t):
         return eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
 
-    t = prepare_times(target_times, eta_by_t, target_times)
+    t = prepare_times(track_t, eta_by_t, target_times)
     xs = ksi(t, w_i, w_k, v_x, v_y, v_z, z0, x0)
     ys = eta(t, w_i, w_k, v_x, v_y, v_z, z0, y0)
+    t = t[0:len(xs)]
     return np.stack((xs, ys, t), axis=1)
 
 
