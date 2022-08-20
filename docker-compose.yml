@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    image: ivkin/golf
+    container_name: golf-server
+    ports:
+      - "80:5001"
+    command: flask run
+    stdin_open: true
+    tty: true
