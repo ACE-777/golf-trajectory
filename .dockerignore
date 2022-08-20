@@ -1,0 +1,11 @@
+.git
+data/dataset
+.env
+env
+env2
+.vscode
+.idea
+
+cfgs/
+images/
+lib/
