@@ -32,3 +32,5 @@ COPY app.py .
 RUN adduser --system --group golf
 RUN chown -R golf:golf /golf
 USER golf
+
+ENV FLASK_RUN_HOST=0.0.0.0
