@@ -26,6 +26,7 @@ COPY requirements.txt .
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 COPY magnus.py .
+COPY curve.py .
 COPY app.py .
 
 RUN adduser --system --group golf
