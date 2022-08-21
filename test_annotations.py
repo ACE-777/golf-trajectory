@@ -28,7 +28,7 @@ class FittingMode(Enum):
     ApexAndLast = 4
 
 
-def test_dataset(root, mode=FittingMode.Normal, visualize=False, algorithm='Newton-CG', max_tasks=100):
+def test_dataset(root, mode=FittingMode.Normal, visualize=False, algorithm='SLSQP', max_tasks=100):
     print('Starting test mode: {} algorithm: {} max_tasks: {}'.format(mode, algorithm, max_tasks))
     total_dists = []
     total_tasks = 0

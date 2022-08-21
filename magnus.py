@@ -132,7 +132,7 @@ def distance_magnus(params, track):
     return sum(diag) / len(dists)
 
 
-def minimize_magnus(track, target_times, method='Newton-CG'):
+def minimize_magnus(track, target_times, method='SLSQP'):
     bounds = ((-200, 200), (-200, 200), (20, 300), (1, 100), (-50, 50), (-1, 1), (0, 1), (2, 10))
 
     result = minimize(distance_magnus, x0=(100, 100, 50, 30, 0, 0, 0, 5), args=track, bounds=bounds, method=method)
