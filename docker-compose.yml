@@ -12,7 +12,7 @@ services:
     image: ivkin/golf
     container_name: golf-server
     ports:
-      - "80:5001"
+      - "80:5000"
     command: flask run
     stdin_open: true
     tty: true
