@@ -48,7 +48,8 @@ def visualize_magnus(t_eval):
     fig = plt.figure()
     ax = plt.axes(projection='3d')
     fig.suptitle('Golf ball Magnus model')
-
+    np.set_printoptions(formatter={'float': '{: 0.1f}'.format})
+    print('t: {}'.format(t_eval))
     print('x: {}'.format(y[0, :]))
     print('y: {}'.format(y[2, :]))
     print('z: {}'.format(y[4, :]))
@@ -153,5 +154,5 @@ def minimize_magnus(track, target_times, method='SLSQP'):
 
 
 if __name__ == '__main__':
-    times = np.linspace(0, 10, 20)
+    times = np.linspace(0, 9.5, 20)
     visualize_magnus(times)
